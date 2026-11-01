@@ -1,0 +1,34 @@
+# Python / environments
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets - never commit
+.env
+*.pem
+*.key
+
+# Node / frontend
+node_modules/
+.next/
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Generated content: keep the folders (.gitkeep) but ignore what is inside
+data/**
+!data/**/
+!data/**/.gitkeep
+
+outputs/**
+!outputs/**/
+!outputs/**/.gitkeep
+
+logs/**
+!logs/
+!logs/.gitkeep
