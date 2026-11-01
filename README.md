@@ -1,4 +1,4 @@
-﻿# CyberIntelGraph
+# CyberIntelGraph
 
 Evidence-grounded, agentic **Cyber Threat Intelligence (CTI)** research system.
 
@@ -7,7 +7,7 @@ CISA advisories), builds one unified knowledge graph (Microsoft GraphRAG + Neo4j
 research questions with citations, source URLs, dates and stated limitations - never with
 unsupported claims.
 
-> **Status:** Milestone 1 - structure only. See `PROJECT_STATUS.md`.
+> **Status:** Milestone 1 verified. Milestone 3 in progress: CISA KEV collector. See `PROJECT_STATUS.md`.
 
 ## Start here (read in this order)
 1. `docs/GETTING_STARTED.md`  - install Python 3.12, create the virtual environment, verify
@@ -36,3 +36,12 @@ LangGraph | BGE-M3 embeddings | hosted LLM API | Next.js + TypeScript | DeepEval
 - Install only the packages the current milestone needs.
 - Never commit `.env`, `.venv` or large datasets (already in `.gitignore`).
 - After every change update `CHANGELOG.md` and `PROJECT_STATUS.md`.
+
+## Collectors (Milestone 3)
+| Source | Status | Run |
+|---|---|---|
+| CISA KEV | implemented, awaiting first real run | `python ingestion\collectors\cisa_kev\collector.py` |
+| NVD, MITRE ATT&CK, CWE, CISA advisories | not started | - |
+
+Details: `docs/pipeline/03_cisa_kev_collector.md`. Check results with `python scripts\check_kev_output.py`.
+Run unit tests: `python -m unittest discover -s tests\unit -v`.

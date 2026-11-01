@@ -1,23 +1,24 @@
 # Project Status
 
-**Current milestone:** 1 - Environment and project structure
+**Current milestone:** 3 - Collectors (CISA KEV first)
 
 ## Completed
-- [x] Folder structure created
-- [x] Starter documentation and helper scripts created
-- [ ] Python 3.12 virtual environment verified (run scripts\setup_env.ps1)
-- [ ] Structure verified on your PC (run scripts\verify_structure.ps1)
-- [ ] Git repository initialized, first commit made, pushed to GitHub
+- [x] Milestone 1: Python 3.12.10 venv, folder structure verified (STRUCTURE OK), pushed to GitHub (commit d41efb8)
+- [x] CISA KEV collector written, unit-tested (13 tests) and tested against a local mock server
+- [ ] CISA KEV collector run against the REAL CISA feed and validated on your PC
+- [ ] KEV data dictionary page confirmed against real data (docs/data_dictionary/cisa_kev.md)
+- [ ] KEV work committed and pushed
 
 ## Working functionality
-- None yet (foundation only)
+- `python ingestion\collectors\cisa_kev\collector.py` (not yet confirmed on the real feed)
+- `python scripts\check_kev_output.py`
 
 ## Pending
-- Milestone 2: dataset preparation
-- Milestone 3: collectors, starting with CISA KEV
+- NVD collector (next, after KEV is confirmed), then MITRE ATT&CK, CWE, CISA advisories
+- Milestone 4: raw data validation reports; Milestone 5: canonical schemas
 
 ## Known issues
-- None
+- None known. Unconfirmed: exact real-feed field list and warnings (see data dictionary)
 
 ## Next exact task
-Build the CISA KEV collector: official JSON catalog -> data/raw/cisa_kev/ (original) and data/processed/ (normalized).
+Run the KEV collector and both checks, paste the output, then commit and push.
