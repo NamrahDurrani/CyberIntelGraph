@@ -7,7 +7,7 @@ CISA advisories), builds one unified knowledge graph (Microsoft GraphRAG + Neo4j
 research questions with citations, source URLs, dates and stated limitations - never with
 unsupported claims.
 
-> **Status:** Milestone 1 verified. Milestone 3 in progress: CISA KEV collector. See `PROJECT_STATUS.md`.
+> **Status:** Milestone 1 verified. Milestone 3 in progress: CISA KEV done, NVD collector built. See `PROJECT_STATUS.md`.
 
 ## Start here (read in this order)
 1. `docs/GETTING_STARTED.md`  - install Python 3.12, create the virtual environment, verify
@@ -40,8 +40,10 @@ LangGraph | BGE-M3 embeddings | hosted LLM API | Next.js + TypeScript | DeepEval
 ## Collectors (Milestone 3)
 | Source | Status | Run |
 |---|---|---|
-| CISA KEV | implemented, awaiting first real run | `python ingestion\collectors\cisa_kev\collector.py` |
-| NVD, MITRE ATT&CK, CWE, CISA advisories | not started | - |
+| CISA KEV | validated on the real feed | `python ingestion\collectors\cisa_kev\collector.py` |
+| NVD | implemented, awaiting first real run | `python ingestion\collectors\nvd\collector.py --limit 3` |
+| MITRE ATT&CK, CWE, CISA advisories | not started | - |
 
-Details: `docs/pipeline/03_cisa_kev_collector.md`. Check results with `python scripts\check_kev_output.py`.
+Details: `docs/pipeline/03_cisa_kev_collector.md`, `docs/pipeline/04_nvd_collector.md`.
+Check results with `python scripts\check_kev_output.py` and `python scripts\check_nvd_output.py`.
 Run unit tests: `python -m unittest discover -s tests\unit -v`.

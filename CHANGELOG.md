@@ -3,23 +3,34 @@
 Record every meaningful change here (date, milestone, files added/changed, dependencies,
 commands run, tests performed, known limitations).
 
-## [Milestone 3 - CISA KEV collector] - 2026-11-01
+## [Milestone 3 - NVD collector] - 2026-11-01
 ### Added
-- `ingestion/collectors/cisa_kev/collector.py` (download, raw save, validation, normalization, subset, report, log)
-- `tests/unit/test_cisa_kev_collector.py` (13 stdlib unittest tests using clearly synthetic fixtures)
-- `scripts/check_kev_output.py` (independent output check, includes SHA-256 verification)
+- `ingestion/collectors/nvd/collector.py` (CVE API 2.0, one request per CVE, rate limiting, retries, resume via manifest,
+  raw save, validation, normalization, report, log; optional `NVD_API_KEY` from `.env`, sent as `apiKey` header)
+- `tests/unit/test_nvd_collector.py` (17 tests, synthetic fixtures), `scripts/check_nvd_output.py`
+- `docs/data_dictionary/nvd.md`, `docs/pipeline/04_nvd_collector.md`; decision 0002 extended (NVD default = 150 CVEs from KEV ordering)
+### Dependencies
+- None new (requests already installed)
+### Tests performed
+- 30 unit tests pass (13 KEV + 17 NVD)
+- End to end against a LOCAL mock server: 503 retry, HTTP 404 reported as failure, 0-record answer reported separately,
+  wrong-ID answer rejected, invalid CVE input ignored, resume/reuse on second run, API key sent only as header and never
+  written to logs/manifest/report, check script catches a changed raw file
+- NOT yet run against the real NVD API (pending user run)
+### Known limitations
+- NVD field names confirmed from public documentation only; verify against the first real download
+- Default NVD set contains only KEV-listed CVEs (see decision 0002)
+
+## [Milestone 3 - CISA KEV collector] - 2026-11-01
+### Verified on the user's PC (real CISA feed)
+- Catalog version 2026.10.30, 1766 records, 0 rejected, 0 duplicates, 0 warnings; raw file 1,826,755 bytes
+- 361 records with known ransomware campaign use; date_added range 2021-11-03 .. 2026-10-30
+- 13 unit tests OK; check script ALL CHECKS PASSED; second run reused the unchanged raw file; committed d74e626 and pushed
+### Added
+- `ingestion/collectors/cisa_kev/collector.py`, `tests/unit/test_cisa_kev_collector.py`, `scripts/check_kev_output.py`
 - `docs/data_dictionary/cisa_kev.md`, `docs/decisions/0002-initial-dataset-scope.md`, `docs/pipeline/03_cisa_kev_collector.md`
-### Changed
-- `README.md` (status, collectors table), `requirements.txt` (requests), project docs now use C:\CyberIntelGraph
 ### Dependencies
 - requests
-### Tests performed
-- 13 unit tests pass; collector exercised end to end against a LOCAL mock server (retry after HTTP 503, 404, count mismatch,
-  non-JSON body, same-second collision, unchanged-content reuse, tamper detection by check script)
-- NOT yet run against the real CISA feed (pending user run)
-### Known limitations
-- Field list in the data dictionary must be confirmed against the first real download
-- Subset rule (ransomware-linked first, newest first) is proposed in decision 0002 and awaits confirmation
 
 ## [Milestone 1 - environment and structure] - 2026-11-01
 ### Verified on the user's PC

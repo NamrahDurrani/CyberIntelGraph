@@ -1,7 +1,7 @@
 # 0002 - Initial dataset scope
 
 - Date: 2026-11-01
-- Status: proposed (confirm or change; other sources will be added as their collectors are built)
+- Status: accepted for KEV as implemented (subset rule not objected to); other sources are added as their collectors are built
 
 ## Context
 The project starts with a small, focused dataset (ransomware, initial access, exploited vulnerabilities,
@@ -27,3 +27,10 @@ malware and techniques) instead of downloading everything. Targets from the mast
 - The NVD collector (Milestone 3, next) should fetch the CVEs listed in the KEV subset first, so the two sources overlap
   and we can test deduplication into one canonical Vulnerability entity.
 - Selection is a convenience for keeping GraphRAG indexing cheap; it does not change what the raw record says.
+
+## Decision for NVD (second collector)
+- Default target: **150 CVEs** = the KEV ordering above (first 75 are exactly the KEV initial subset, next 75 continue the same ordering).
+- Every CVE in the default NVD set is therefore also in KEV. That is intentional for the first test of cross-source deduplication,
+  but it means the NVD set contains **no non-exploited CVEs**. Add some later with `--cve-id` (or a keyword/date query) before evaluation
+  if questions about non-KEV vulnerabilities are needed (Milestone 17).
+- One request per CVE (the API takes a single `cveId`), about 150 requests: roughly 16 minutes without an API key, 2 minutes with one.
