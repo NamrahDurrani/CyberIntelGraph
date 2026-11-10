@@ -6,3 +6,4 @@
 # See docs/pipeline/00_milestone_roadmap.md for the exact package list per milestone.
 requests
 beautifulsoup4
+pydantic>=2
