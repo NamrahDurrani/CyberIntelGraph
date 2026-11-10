@@ -1,0 +1,62 @@
+# Seed list for the CISA advisories collector (one URL per line, '#' starts a comment).
+#
+# These are CANDIDATE advisory addresses, built from CISA's published advisory codes
+# (#StopRansomware, exploited-vulnerability, initial-access and malware advisories).
+# They have NOT been verified one by one. The collector fetches each page and reports any
+# that fail (for example HTTP 404). A failure only means the address is wrong or has moved:
+# delete or fix that line. The collector never invents content for a page it could not read.
+# Removed after the first real run (HTTP 404): aa21-265a, aa22-293a.
+# The RSS feed is read first; this list tops up the collection towards the 50-75 document target.
+
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-302a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa20-352a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa21-131a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa21-209a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-011a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-040a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-103a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-110a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-117a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-137a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-181a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-257a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-264a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-277a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-321a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-335a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-040a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-061a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-075a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-136a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-144a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-158a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-165a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-215a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-284a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-319a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-320a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa23-353a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-038a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-057a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-060a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-060b
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-109a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-131a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-241a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-242a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa24-317a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-022a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-050a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-071a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-141a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-141b
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-163a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-203a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa25-239a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa26-293a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa21-200a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa21-201a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa21-243a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa21-356a
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-138b
+https://www.cisa.gov/news-events/cybersecurity-advisories/aa22-216a

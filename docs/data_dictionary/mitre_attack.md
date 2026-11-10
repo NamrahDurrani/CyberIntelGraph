@@ -13,8 +13,8 @@
 | Raw location | `data/raw/mitre_attack/enterprise-attack-<version>__<time>.json`, `index__<time>.json`, `.meta.json` sidecars |
 | Processed location | `data/processed/attack_objects_normalized.json`, `attack_relationships_normalized.json` |
 | Release profiled during development | Enterprise ATT&CK **20.0** (index modified 2026-10-13): 26,690 STIX objects |
-| Collection date on your PC | **fill in after your first run** |
-| Verified on your PC? | **NO - fill in after your first run.** (The structure below was verified on the real v20.0 file in the development environment.) |
+| Collection date on your PC | see the timestamp in the raw file name (`enterprise-attack-<version>__<time>.json`) |
+| Verified on your PC? | **Collector and independent check: YES** (15 checks passed; 706 techniques including 479 sub-techniques, 15 tactics, 178 groups, 747 malware, 95 tools, 57 campaigns, 44 mitigations; 20,957 relationships: 18,975 uses, 1,477 mitigates, 479 subtechnique-of, 26 attributed-to; 22 Initial Access techniques). **Field list: to be confirmed by running the Milestone 4 audit** (`RAW_DATA_AUDIT.md`, section 5, lists the fields that really occur). |
 | License / usage terms | Read the ATT&CK terms of use (https://attack.mitre.org/resources/legal-and-branding/terms-of-use/) and paste the exact wording here. |
 
 ## Release choice

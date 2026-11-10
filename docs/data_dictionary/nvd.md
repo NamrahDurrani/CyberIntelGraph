@@ -13,8 +13,8 @@
 | Processed location | `data/processed/nvd_normalized.json` |
 | Rate limits (published by NVD) | 5 requests / 30 s without API key; 50 requests / 30 s with a free key. NVD suggests ~6 s between requests without a key. |
 | API key | Free: https://nvd.nist.gov/developers/request-an-api-key . Sent in the `apiKey` HTTP header (case-sensitive). Put `NVD_API_KEY=...` in `.env` (never committed). |
-| Collection date / records | **fill in after the first real run** |
-| Verified against a real download? | **NO - update this page after the first real run** |
+| Collection date / records | 2026-11-01 (your PC, with an API key): 150 CVEs requested, 150 downloaded, 0 failed, 0 returned empty |
+| Verified against a real download? | **Collector and independent check: YES** (all 150 with CVSS, CWE and affected products; severity 86 CRITICAL / 53 HIGH / 10 MEDIUM / 1 LOW; NVD carried CISA fields on all 150 records). **Field list: to be confirmed by running the Milestone 4 audit** (`RAW_DATA_AUDIT.md`, section 5, lists the fields that really occur). |
 | License / usage terms | Read the NVD developer terms and paste the exact wording here. |
 
 ## What NVD does and does not tell you

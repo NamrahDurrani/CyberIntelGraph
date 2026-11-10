@@ -11,9 +11,9 @@
 | Collector | `ingestion/collectors/cisa_kev/collector.py` |
 | Raw location | `data/raw/cisa_kev/kev_raw_<UTC timestamp>.json` (+ `.meta.json` sidecar) |
 | Processed location | `data/processed/cisa_kev_normalized.json`, `cisa_kev_initial_subset.json` |
-| Collection date | **fill in after the first real run** |
-| Catalog version / count at collection | **fill in after the first real run** |
-| Verified against a real download? | **NO - update this page after the first real run** |
+| Collection date | 2026-11-01 (your PC) |
+| Catalog version / count at collection | `2026.10.30`, released 2026-10-30T17:02:45Z, 1,766 records (raw file 1,826,755 bytes) |
+| Verified against a real download? | **Collector and independent check: YES** (1,766 valid, 0 rejected, 0 duplicates, 0 warnings; 361 with known ransomware use; added 2021-11-03 to 2026-10-30). **Field list: to be confirmed by running the Milestone 4 audit** (`RAW_DATA_AUDIT.md`, section 5, lists the fields that really occur). |
 | License / usage terms | Public U.S. government data. Read the terms on the CISA site and paste the exact wording here. |
 
 ## What KEV means (important for this project)

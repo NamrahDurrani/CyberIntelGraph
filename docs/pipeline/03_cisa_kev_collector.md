@@ -33,7 +33,7 @@ Warnings **keep** it (e.g. an empty `requiredAction`). Exit code is 0 on success
 
 ## Run it
 ```powershell
-cd C:\CyberIntelGraph
+cig                              # or: cd to your project folder
 .\.venv\Scripts\Activate.ps1
 python -m pip install requests
 python ingestion\collectors\cisa_kev\collector.py

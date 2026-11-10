@@ -1,29 +1,26 @@
 # Project Status
 
-**Current milestone:** 3 - Collectors (KEV and NVD validated; ATT&CK built, to run; CWE and advisories next)
+**Current milestone:** 4 - Raw data audit: run on your PC; one follow-up fix delivered (CWE check); then commit and close
 
 ## Completed
-- [x] Milestone 1: Python 3.12.10 venv, folder structure verified, pushed to GitHub
-- [x] CISA KEV collector validated on the real feed (catalog 2026.10.30, 1766 records), committed d74e626
-- [x] NVD collector validated on the real API with an API key (150/150 CVEs, all checks passed, 75/75 KEV subset covered)
-- [x] MITRE ATT&CK collector written, 19 unit tests, run on the real v20.0 data in the development environment (1,842 objects, 20,957 relationships)
-- [ ] NVD work committed and pushed (waiting for you to run the commit step)
-- [ ] ATT&CK collector run on your PC and check script passed
-- [ ] KEV, NVD, ATT&CK data dictionary pages confirmed against your real field lists
-- [ ] ATT&CK work committed and pushed
+- [x] Milestones 1 and 3 (gate passed on your PC); problems found in that run fixed
+- [x] Advisories: 53 documents, all dated, derived dates validated (19/19 agree with stated dates), target 50-75 met
+- [x] Milestone 4 audit run on your PC: all five dataset targets MET, sources agree (NVD vs KEV dates 150/150), no data tracked by Git, 211 raw files verified
+- [x] CWE parser fix works for the data (8 missing ids found); CWE check wording fixed (any non-weakness kind counts) and ICS technique ids classified in the audit
+- [ ] Patch installed; `python scripts\check_cwe_output.py` passes; `python ingestion\validation\audit_raw_data.py --write-doc` prints **no FAIL**
+- [ ] `docs/data_dictionary/RAW_DATA_AUDIT.md` read (field inventory) and committed
+- [ ] Everything committed and pushed (code, docs, audit document)
+- [ ] `cig doctor` output seen (location tooling confirmed on your PC)
 
 ## Working functionality
-- `python ingestion\collectors\cisa_kev\collector.py` (confirmed on your PC)
-- `python ingestion\collectors\nvd\collector.py` (confirmed on your PC)
-- `python ingestion\collectors\mitre_attack\collector.py` (confirmed in the development environment, not yet on your PC)
-- `python scripts\check_kev_output.py`, `check_nvd_output.py`, `check_attack_output.py`
+- Five collectors, five check scripts, the gate, the audit, doctor and `cig`
 
 ## Pending
-- CWE (XML) collector, CISA advisories collector (RSS + HTML)
-- Milestone 4: raw data validation reports; Milestone 5: canonical schemas and cross-source deduplication
+- Milestone 5: canonical schemas and cross-source deduplication. Decisions needed first: ATT&CK `tool` and `malware` mapping; whether to add the ICS matrix; adding some non-KEV CVEs to the NVD set
+- Milestone 6: Docling and chunking
 
 ## Known issues
-- None known
+- None blocking. The real name of the CWE grouping entries is shown by the collector (`Other entry kinds`)
 
 ## Next exact task
-Commit the NVD work, confirm the KEV/NVD field lists, then run the ATT&CK collector and its check script.
+Install the patch, run the CWE check and the audit, paste the audit summary, then commit and push.

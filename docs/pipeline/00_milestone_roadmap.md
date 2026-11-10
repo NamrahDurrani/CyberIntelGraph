@@ -1,9 +1,9 @@
-﻿# Milestone Roadmap (18 milestones)
+# Milestone Roadmap (18 milestones)
 
 Rule: finish and **test** one milestone before starting the next. At the end of each one:
 update `CHANGELOG.md` + `PROJECT_STATUS.md`, then `git add . ; git commit -m "Milestone N: ..." ; git push`.
 
-Always run commands from `C:\CyberIntelGraph` with the venv active (`(.venv)` in the prompt).
+Always run commands from the project folder with the venv active (`(.venv)` in the prompt). Type `cig` to get there from any terminal (see `docs/PROJECT_LOCATION.md`).
 
 Package rule: install ONLY what the current milestone lists, then record it in `requirements.txt`
 (`python -m pip freeze` is too noisy - add the top-level package names by hand).
@@ -33,11 +33,12 @@ Package rule: install ONLY what the current milestone lists, then record it in `
 **Done when:** raw file exists in `data/raw/<source>/`, record count and required fields validated, no duplicates.
 
 ## Milestone 4 - Raw data validation and storage
-**Goal:** prove the raw data is complete and trustworthy; record a SHA-256 hash and counts per file.
-**Folders:** `ingestion/validation/`, `data/raw/`.
-**Run (hash check):** `Get-FileHash data\raw\cisa_kev\*.json -Algorithm SHA256`
-**Why keep raw data?** It is the evidence locker: if normalization has a bug you can always re-run from the original.
-**Done when:** each source has a validation report in `outputs/reports/` (ignored by Git) and counts noted in `docs/data_dictionary/`.
+**Goal:** prove the whole raw data layer is complete, untouched, fresh, consistent across sources, documented and kept out of Git.
+**Analogy:** the surveyor's visit before an architect designs the house.
+**Built:** `ingestion/validation/audit_raw_data.py` (one command for all five sources), `config/dataset_targets.json`, `scripts/protect_raw_data.ps1` (optional read-only protection), generated `docs/data_dictionary/RAW_DATA_AUDIT.md`. Details: `docs/pipeline/08_raw_data_audit.md`, decision 0005.
+**Run:** `python ingestion\validation\audit_raw_data.py --write-doc`
+**Packages:** none.
+**Done when:** the audit prints no FAIL on your PC, the advisories reach their target (or the shortfall is explained), the generated audit document is committed, and the data dictionary pages are no longer marked "not verified".
 
 ## Milestone 5 - Canonical schemas and normalization
 **Goal:** one official shape for every entity so duplicates merge (CVE-2024-3400 from NVD + KEV + advisories = ONE Vulnerability node with several evidence records).

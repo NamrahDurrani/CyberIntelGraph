@@ -1,6 +1,8 @@
 # Dependencies are added milestone by milestone - do NOT install everything at once.
 # Milestone 1-2 : none
-# Milestone 3   : requests            (collectors)  <-- installed for the CISA KEV collector
+# Milestone 3   : requests            (all collectors)
+#                 beautifulsoup4      (CISA advisories collector: HTML text extraction)
 # Milestone 5   : pydantic            (schemas)
 # See docs/pipeline/00_milestone_roadmap.md for the exact package list per milestone.
 requests
+beautifulsoup4

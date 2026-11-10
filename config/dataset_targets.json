@@ -1,0 +1,10 @@
+{
+  "description": "Initial dataset targets from the master prompt (section 3). They are initial targets, not permanent limits. Used by ingestion/validation/audit_raw_data.py.",
+  "targets": [
+    {"source": "nvd", "metric": "records", "min": 150, "max": 200, "note": "NVD 150-200 vulnerability records"},
+    {"source": "kev", "metric": "initial_subset_records", "min": 50, "max": 75, "note": "CISA KEV 50-75 entries (initial subset; the full catalog is kept too)"},
+    {"source": "attack", "metric": "objects", "min": 1, "max": null, "note": "MITRE ATT&CK: relevant subset of STIX objects (decision 0003)"},
+    {"source": "cwe", "metric": "initial_subset_records", "min": 1, "max": null, "note": "CWE: relevant weakness categories (decision 0004: ids we use plus ancestors)"},
+    {"source": "advisories", "metric": "documents", "min": 50, "max": 75, "note": "CISA advisories 50-75 documents"}
+  ]
+}

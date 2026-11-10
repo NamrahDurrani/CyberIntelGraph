@@ -29,12 +29,12 @@ Outcomes per CVE: **ok**, **no record** (HTTP 200 but 0 results: reported, never
 
 ## Get an API key first (recommended, free, a few minutes)
 1. Request one at https://nvd.nist.gov/developers/request-an-api-key (the key is emailed to you).
-2. Open `C:\CyberIntelGraph\.env` (create it with `Copy-Item .env.example .env` if missing) and set `NVD_API_KEY=` to your key.
+2. Open the `.env` file in the project folder (create it with `Copy-Item .env.example .env` if missing) and set `NVD_API_KEY=` to your key.
 3. `.env` is ignored by Git. Never paste the key in chat or commit it. The collector never prints it.
 
 ## Run it
 ```powershell
-cd C:\CyberIntelGraph
+cig                              # or: cd to your project folder
 .\.venv\Scripts\Activate.ps1
 python ingestion\collectors\nvd\collector.py --limit 3        # small first test (about 20 s without a key)
 python scripts\check_nvd_output.py

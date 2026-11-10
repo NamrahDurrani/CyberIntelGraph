@@ -22,7 +22,7 @@ It is published as **STIX 2.1**, a standard JSON format where every object has a
 
 ## Run it
 ```powershell
-cd C:\CyberIntelGraph
+cig                              # or: cd to your project folder
 .\.venv\Scripts\Activate.ps1
 python ingestion\collectors\mitre_attack\collector.py
 python scripts\check_attack_output.py

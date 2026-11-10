@@ -24,3 +24,11 @@ The master prompt asks for a "relevant subset of STIX objects" from MITRE ATT&CK
 - ATT&CK data does not need GraphRAG's LLM extraction: structured records get `evidence_type = structured_authoritative_record`.
 - Disk use is about 100 MB (raw + processed); both are outside Git.
 - New ATT&CK releases are picked up by simply running the collector again (a new raw file is kept next to the old one).
+
+## Amendment (2026-11-10): ICS technique ids in advisories
+The first audit found 15 technique-style ids in advisory text (T0801, T0803, T0804, T0807, T0809, T0812 ...) that are not active Enterprise techniques.
+Ids T0800-T0899 belong to the **ATT&CK for ICS** matrix, which this decision deliberately does not collect (Enterprise only).
+The audit now classifies them as INFO ("ICS matrix, not collected") and keeps WARN for ids that are neither Enterprise nor ICS (retired, Mobile, or not really ATT&CK ids).
+**Open question for Milestone 5:** if questions about industrial control systems matter for the project, add the ICS domain with the same collector (`index.json` lists it);
+otherwise advisory mentions of ICS techniques stay as lexical mentions without an ATT&CK record to link to.
+

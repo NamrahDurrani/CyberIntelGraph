@@ -1,4 +1,4 @@
-﻿# GitHub Guide - make this folder a GitHub repository
+# GitHub Guide - make this folder a GitHub repository
 
 Analogy: **Git** is a time machine on your PC (every commit is a save point). **GitHub** is the
 cloud copy of that time machine, so you can recover or continue on another PC.
@@ -12,7 +12,7 @@ git config --global user.email "you@example.com"
 ## 2. Local repository + first commit
 Easiest: use the helper script.
 ```powershell
-cd C:\CyberIntelGraph
+cig                              # or: cd to your project folder
 .\scripts\git_init.ps1
 ```
 Manual equivalent:
@@ -72,8 +72,9 @@ Commit message pattern: `Milestone N: what you did`.
 
 ## 7. Restoring on another PC
 ```powershell
-git clone https://github.com/YOUR-USER/CyberIntelGraph.git C:\CyberIntelGraph
-cd C:\CyberIntelGraph
+$project = "C:\CyberIntelGraph"     # any folder you like, on any drive
+git clone https://github.com/YOUR-USER/CyberIntelGraph.git $project
+cd $project
 .\scripts\setup_env.ps1
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt

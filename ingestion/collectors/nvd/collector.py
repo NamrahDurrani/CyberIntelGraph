@@ -34,7 +34,13 @@ from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-import requests
+try:
+    import requests
+except ImportError:  # usually the virtual environment is not active
+    sys.stderr.write("ERROR: the 'requests' package is not available in this Python (" + sys.executable + ").\n"
+                     "Activate the project environment first (type: cig   or run: .\\.venv\\Scripts\\Activate.ps1 in the project folder),\n"
+                     "or install the package with: python -m pip install -r requirements.txt\n")
+    raise SystemExit(2)
 
 # --------------------------------------------------------------------------- constants
 SOURCE_NAME = "NVD - National Vulnerability Database (CVE API 2.0)"
