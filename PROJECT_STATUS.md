@@ -24,3 +24,8 @@
 
 ## Next exact task
 Install the patch, run the CWE check and the audit, paste the audit summary, then commit and push.
+
+## Milestone 5.1 - done (2026-11-10)
+- Canonical graph now links KEV and NVD CWE ids: HAS_WEAKNESS 171 -> 1755.
+- ATT&CK sub-technique parents verified (479/479).
+- Next: Milestone 6 (Docling + chunking of the advisories).

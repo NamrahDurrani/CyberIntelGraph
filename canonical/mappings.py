@@ -54,6 +54,7 @@ ALIASES = {
     "kev_ransomware": ("known_ransomware_campaign_use", "ransomware_use",
                        "known_ransomware_use"),
     "nvd_cwes": ("cwe_ids", "cwes", "weaknesses", "cwe"),
+    "kev_cwes": ("cwes", "cwe_ids", "cwe"),          # Milestone 5.1
     "nvd_products": ("affected_products", "products"),
     "cwe_id": ("cwe_id", "id", "identifier"),
     "cwe_rels": ("related_weaknesses", "relationships", "related"),

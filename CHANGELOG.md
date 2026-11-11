@@ -3,6 +3,13 @@
 Record every meaningful change here (date, milestone, files added/changed, dependencies,
 commands run, tests performed, known limitations).
 
+## Milestone 5.1 - 2026-11-10 - KEV CWE ids now create HAS_WEAKNESS links
+- Fixed: `cwes` on KEV records were ignored; HAS_WEAKNESS is now 1755 (was 171).
+- Changed: `canonical/build.py` (shared `_link_weaknesses`), `canonical/mappings.py` (alias).
+- Added: `tests/unit/test_canonical_kev_cwes.py`, `scripts/apply_milestone_5_1_docs.py`.
+- Verified: 479 sub-techniques still have 479 parent links; entity ids and schema unchanged.
+- Commit 3cd7374 (Milestone 5) intentionally left as is.
+
 ## [Audit results on the user's PC and two follow-up fixes] - 2026-11-10
 ### Verified on the user's PC (2026-11-09)
 - Advisories: 53 documents (target 50-75 met), every one dated, 34 dates derived from alert codes and **19/19 stated Release Dates agree with the code-derived date**, 20 pages marked Archived, 175 distinct CVEs mentioned (161 in KEV, 36 in the NVD set, 14 in neither); all 14 advisory checks passed

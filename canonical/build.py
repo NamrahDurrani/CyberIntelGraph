@@ -10,6 +10,7 @@ import glob
 import hashlib
 import json
 import os
+import re
 import sys
 from collections import Counter
 from datetime import datetime, timezone
@@ -73,6 +74,7 @@ class Builder:
         self.entities: dict[str, object] = {}
         self.rels: dict[str, Relationship] = {}
         self.unresolved: list[dict] = []
+        self._unresolved_seen: set = set()
         self.skipped = Counter()
         self.stix_to_cid: dict[str, str] = {}
         self.tactic_by_short: dict[str, str] = {}
@@ -163,6 +165,54 @@ class Builder:
                 s.aliases.append(alias)
         return s.canonical_id
 
+    # ---------- Milestone 5.1: one shared CWE linker for NVD and KEV ----------
+    @staticmethod
+    def _cwe_tokens(raw) -> list[str]:
+        """Turn a CWE field (list, comma string, dicts, None) into raw tokens."""
+        if raw is None:
+            return []
+        if isinstance(raw, dict):
+            raw = raw.get("cwe_id") or raw.get("id")
+        if isinstance(raw, (list, tuple, set)):
+            out = []
+            for item in raw:
+                out.extend(Builder._cwe_tokens(item))
+            return out
+        text = str(raw).strip()
+        if not text:
+            return []
+        return [t for t in re.split(r"[,;|\s]+", text) if t]
+
+    def _note_unresolved(self, entry: dict):
+        key = (entry["kind"], entry["id"], entry["from"])
+        if key not in self._unresolved_seen:
+            self._unresolved_seen.add(key)
+            self.unresolved.append(entry)
+
+    def _link_weaknesses(self, vid: str, raw, ev: Evidence, tag: str):
+        """Create Vulnerability -HAS_WEAKNESS-> Weakness edges for one record.
+
+        tag is 'nvd' or 'kev' (used only for the skipped-counter names).
+        - placeholders (NVD-CWE-noinfo / -Other): counted, no edge
+        - unparsable tokens: counted, no edge
+        - CWE ids missing from the catalog: logged as unresolved, no edge
+        - same CWE from both sources: add_rel merges into ONE edge, two evidence
+        """
+        for tok in self._cwe_tokens(raw):
+            if tok in CWE_PLACEHOLDERS:
+                self.skipped[f"{tag}:placeholder_{tok}"] += 1
+                continue
+            cwe = norm_cwe(tok)
+            if not cwe:
+                self.skipped[f"{tag}:cwe_unparsable"] += 1
+                continue
+            wid = make_id("Weakness", cwe)
+            if wid not in self.entities:
+                self._note_unresolved({"kind": "cwe_not_in_catalog", "id": cwe,
+                                       "from": vid})
+                continue
+            self.add_rel("HAS_WEAKNESS", vid, wid, ev, AUTH)
+
     def from_kev(self, recs):
         for r in recs:
             cve = norm_cve(r.get("cve_id", ""))
@@ -180,6 +230,8 @@ class Builder:
                                  "cisa_kev", e)
             if sid:
                 self.add_rel("AFFECTS", v.canonical_id, sid, e, AUTH)
+            self._link_weaknesses(v.canonical_id, pick(r, ALIASES["kev_cwes"], []),
+                                  e, "kev")
 
     def from_nvd(self, recs):
         for r in recs:
@@ -196,19 +248,7 @@ class Builder:
             if r.get("description"):          # NVD text is richer than KEV's blurb
                 v.description = txt(r["description"])
             vid = v.canonical_id
-            for item in pick(r, ALIASES["nvd_cwes"], []) or []:
-                raw = item.get("cwe_id") if isinstance(item, dict) else item
-                if str(raw) in CWE_PLACEHOLDERS:
-                    self.skipped[f"nvd:placeholder_{raw}"] += 1
-                    continue
-                cwe = norm_cwe(raw)
-                if not cwe:
-                    continue
-                if make_id("Weakness", cwe) not in self.entities:
-                    self.unresolved.append({"kind": "cwe_not_in_catalog", "id": cwe,
-                                            "from": vid})
-                    continue
-                self.add_rel("HAS_WEAKNESS", vid, make_id("Weakness", cwe), e, AUTH)
+            self._link_weaknesses(vid, pick(r, ALIASES["nvd_cwes"], []), e, "nvd")
             for p in pick(r, ALIASES["nvd_products"], []) or []:
                 if isinstance(p, dict):
                     sid = self._software(p.get("vendor"), p.get("product"), "nvd", e)
@@ -252,8 +292,8 @@ class Builder:
                         self.add_rel("PART_OF_TACTIC", ent.canonical_id, tid,
                                      ent.evidence[0], AUTH)
                     else:
-                        self.unresolved.append({"kind": "tactic_shortname_unknown",
-                                                "id": t, "from": ent.canonical_id})
+                        self._note_unresolved({"kind": "tactic_shortname_unknown",
+                                               "id": t, "from": ent.canonical_id})
 
     def from_attack_relationships(self, recs):
         for r in recs:
@@ -293,8 +333,8 @@ class Builder:
                 else:
                     reason = ("ics_matrix_not_collected" if tid.startswith("T08")
                               else "not_active_enterprise_technique")
-                    self.unresolved.append({"kind": "technique_reference", "id": tid,
-                                            "reason": reason, "from": rep.canonical_id})
+                    self._note_unresolved({"kind": "technique_reference", "id": tid,
+                                           "reason": reason, "from": rep.canonical_id})
 
 
 SOURCES = [
@@ -333,7 +373,7 @@ def build(processed_dir: str, out_dir: str, report_dir: str | None = None) -> di
     ents = [e.model_dump(mode="json") for _, e in sorted(b.entities.items())]
     rels = [r.model_dump(mode="json") for _, r in sorted(b.rels.items())]
     unresolved = sorted(b.unresolved, key=lambda u: (u["kind"], u["id"], u["from"]))
-    meta = {"schema_version": SCHEMA_VERSION, "inputs": inputs,
+    meta = {"schema_version": SCHEMA_VERSION, "builder_revision": "5.1", "inputs": inputs,
             "generated_at": datetime.now(timezone.utc).isoformat()}
     for fname, key, rows in (("entities.json", "entity_count", ents),
                              ("relationships.json", "relationship_count", rels),
@@ -341,7 +381,14 @@ def build(processed_dir: str, out_dir: str, report_dir: str | None = None) -> di
         with open(os.path.join(out_dir, fname), "w", encoding="utf-8") as fh:
             json.dump({"metadata": {**meta, key: len(rows)}, "records": rows}, fh,
                       indent=1, ensure_ascii=False)
+    prov = Counter()
+    for r in rels:
+        if r["rel_type"] == "HAS_WEAKNESS":
+            srcs = {x["source"] for x in r["evidence"]}
+            prov["both" if {"cisa_kev", "nvd"} <= srcs else
+                 "kev_only" if srcs == {"cisa_kev"} else "nvd_only"] += 1
     summary = {
+        "has_weakness_provenance": {"total": sum(prov.values()), **dict(prov)},
         "status": "SUCCESS" if not missing else "PARTIAL",
         "missing_inputs": missing,
         "entities_by_type": dict(Counter(e["entity_type"] for e in ents)),
