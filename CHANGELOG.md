@@ -3,6 +3,11 @@
 Record every meaningful change here (date, milestone, files added/changed, dependencies,
 commands run, tests performed, known limitations).
 
+## Milestone 6 - 2026-11-11 - Docling parsing and advisory chunking
+- Added `documents/` (Docling HTML parser, chunker, builder), checker and tests.
+- Output: `data/processed/advisory_chunks.jsonl` - 2734 chunks from 53 advisories.
+- Each chunk keeps doc id, heading path, source URL, date and raw-file SHA-256.
+
 ## Milestone 5.1 - 2026-11-10 - KEV CWE ids now create HAS_WEAKNESS links
 - Fixed: `cwes` on KEV records were ignored; HAS_WEAKNESS is now 1755 (was 171).
 - Changed: `canonical/build.py` (shared `_link_weaknesses`), `canonical/mappings.py` (alias).

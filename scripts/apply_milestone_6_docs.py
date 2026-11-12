@@ -4,7 +4,6 @@ import json
 import os
 import sys
 
-MARK = "Milestone 6"
 MAN = os.path.join("data", "processed", "advisory_chunks_manifest.json")
 REPORT = os.path.join("docs", "CHANGE_REPORT_2026-11-11_M6_docling-chunking.md")
 
@@ -67,12 +66,14 @@ entry = f"""## Milestone 6 - 2026-11-11 - Docling parsing and advisory chunking
 - Each chunk keeps doc id, heading path, source URL, date and raw-file SHA-256.
 
 """
+MARKERS = {"CHANGELOG.md": "## Milestone 6 - 2026-11-11",      # exact heading we write, so
+           "PROJECT_STATUS.md": "## Milestone 6 - done"}        # a mere mention never blocks us
 for path in ("CHANGELOG.md", "PROJECT_STATUS.md"):
     if not os.path.exists(path):
         print(f"[WARN] {path} not found, skipped")
         continue
     t = read(path)
-    if MARK in t:
+    if MARKERS[path] in t:
         print(f"{path}: already has a Milestone 6 entry, skipped")
         continue
     if path == "CHANGELOG.md":
