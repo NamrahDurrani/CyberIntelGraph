@@ -3,6 +3,10 @@
 Record every meaningful change here (date, milestone, files added/changed, dependencies,
 commands run, tests performed, known limitations).
 
+## Milestone 7 - naive RAG baseline
+- Added `rag/`: local embeddings (BAAI/bge-small-en-v1.5), exact vector index over 2734 chunks, Groq `openai/gpt-oss-20b` answers with checked [chunk_id] citations.
+- Added retrieval evaluation (identifier probes + curated questions) as the baseline for Milestone 8.
+
 ## Milestone 6 - 2026-11-11 - Docling parsing and advisory chunking
 - Added `documents/` (Docling HTML parser, chunker, builder), checker and tests.
 - Output: `data/processed/advisory_chunks.jsonl` - 2734 chunks from 53 advisories.

@@ -8,3 +8,4 @@ requests
 beautifulsoup4
 pydantic>=2
 docling
+sentence-transformers

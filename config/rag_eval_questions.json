@@ -1,0 +1,11 @@
+{
+  "note": "Curated retrieval questions. gold_docs are doc_id values from advisory_chunks.jsonl. Add more rows as you read the advisories.",
+  "questions": [
+    {"question": "Which advisory covers ransomware activity targeting the healthcare and public health sector?",
+     "gold_docs": ["advisory_cisa-advisory-aa20-302a"]},
+    {"question": "What malware families were used against healthcare organizations and led to ransomware attacks?",
+     "gold_docs": ["advisory_cisa-advisory-aa20-302a"]},
+    {"question": "What did TrickBot begin as before it became a full suite of tools?",
+     "gold_docs": ["advisory_cisa-advisory-aa20-302a"]}
+  ]
+}

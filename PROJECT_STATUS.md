@@ -16,8 +16,6 @@
 - Five collectors, five check scripts, the gate, the audit, doctor and `cig`
 
 ## Pending
-- Milestone 5: canonical schemas and cross-source deduplication. Decisions needed first: ATT&CK `tool` and `malware` mapping; whether to add the ICS matrix; adding some non-KEV CVEs to the NVD set
-- Milestone 6: Docling and chunking
 
 ## Known issues
 - None blocking. The real name of the CWE grouping entries is shown by the collector (`Other entry kinds`)
@@ -33,3 +31,7 @@ Install the patch, run the CWE check and the audit, paste the audit summary, the
 ## Milestone 6 - done
 - 2734 advisory chunks from 53 documents (Docling HTML).
 - Next: Milestone 7 (naive RAG).
+
+## Milestone 7 - done
+- Naive RAG baseline: 2734 chunks indexed, Groq gpt-oss-20b answers with citations.
+- Next: Milestone 8 (hybrid retrieval: BM25 + semantic).
