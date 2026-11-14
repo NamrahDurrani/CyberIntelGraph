@@ -1,0 +1,15 @@
+{
+  "note": "Milestone 8 plain-language questions, checked against advisory titles seen in ask.py output. gold_docs are doc_id values. They guard against hybrid search hurting ordinary semantic retrieval. Add more rows as you read the advisories.",
+  "questions": [
+    {"question": "Which advisory is about the top malware strains of 2021?",
+     "gold_docs": ["advisory_cisa-advisory-aa22-216a"]},
+    {"question": "Which advisory describes Iran-based cyber actors enabling ransomware attacks on US organizations?",
+     "gold_docs": ["advisory_cisa-advisory-aa24-241a"]},
+    {"question": "Which advisory covers threat actors chaining vulnerabilities in Ivanti Cloud Service Applications?",
+     "gold_docs": ["advisory_cisa-advisory-aa25-022a"]},
+    {"question": "Which advisory lists the 2023 top routinely exploited vulnerabilities?",
+     "gold_docs": ["advisory_cisa-advisory-aa24-317a"]},
+    {"question": "Which advisory lists the 2022 top routinely exploited vulnerabilities?",
+     "gold_docs": ["advisory_cisa-advisory-aa23-215a"]}
+  ]
+}

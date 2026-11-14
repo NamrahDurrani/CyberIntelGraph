@@ -82,12 +82,13 @@ def evaluate(retriever, probes: list[dict], ks=(1, 3, 5, 10)) -> dict:
         entry = {"n": n,
                  "doc_hit@k": {str(k): rate("doc_rank", k) for k in ks},
                  "doc_mrr": round(sum(1 / r["doc_rank"] for r in rs if r["doc_rank"]) / n, 3)}
-        if kind != "curated":
+        has_needle = any(r["p"].get("needle") for r in rs)      # only identifier probes have one
+        if has_needle:
             entry["needle_hit@k"] = {str(k): rate("needle_rank", k) for k in ks}
         out["kinds"][kind] = entry
         out["misses"][kind] = [{"question": r["p"]["question"], "gold_docs": r["p"]["gold_docs"][:3],
                                 "top3": r["top"]} for r in rs
-                               if (r["needle_rank"] if kind != "curated" else r["doc_rank"]) is None][:8]
+                               if (r["needle_rank"] if has_needle else r["doc_rank"]) is None][:8]
     return out
 
 

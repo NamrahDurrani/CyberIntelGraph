@@ -49,8 +49,9 @@ class VectorIndex:
         q = _normalise(np.asarray(qvec, dtype=np.float32).reshape(1, -1))[0]
         scores = self.vectors @ q
         k = max(1, min(k, len(scores)))
-        top = np.argpartition(-scores, k - 1)[:k]
-        top = top[np.lexsort((top, -scores[top]))]
+        # Full ordering (score desc, then row asc). argpartition does NOT break ties
+        # deterministically when identical chunks share the boundary score (Milestone 8 fix).
+        top = np.lexsort((np.arange(len(scores)), -scores))[:k]
         return [(int(i), float(scores[i])) for i in top]
 
     def save(self, out_dir: str):

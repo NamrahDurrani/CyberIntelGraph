@@ -44,7 +44,8 @@ def answer_question(question: str, retriever: Retriever, llm, k: int = 5,
     out = {"question": question,
            "retrieved": [{"rank": h.rank, "score": round(h.score, 4), "chunk_id": h.chunk_id,
                           "title": h.chunk.get("title"), "heading_path": h.chunk.get("heading_path"),
-                          "source_url": h.chunk.get("source_url")} for h in hits]}
+                          "source_url": h.chunk.get("source_url"),
+                          "via": getattr(h, "via", "-")} for h in hits]}
     if llm is None:
         return out
     res = llm.complete(SYSTEM_PROMPT, build_user_prompt(question, hits, max_words_per_chunk))

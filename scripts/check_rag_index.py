@@ -32,10 +32,22 @@ norms = np.linalg.norm(idx.vectors, axis=1)
 check(bool(np.allclose(norms, 1.0, atol=1e-3)), "all vectors are unit length (dot product = cosine)")
 check(len(set(idx.ids)) == len(idx.ids), "chunk ids unique")
 sample = list(range(0, len(idx), max(1, len(idx) // 100)))
-bad = [i for i in sample if idx.search(idx.vectors[i], 1)[0][0] != i]
-check(not bad, f"{len(sample)} sampled chunks each retrieve themselves first")
-dupes = len(idx) - len({tuple(np.round(v, 4)) for v in idx.vectors[:: max(1, len(idx) // 500)]})
-check(dupes < 0.1 * len(sample) + 5, f"vectors are not degenerate (near-identical in sample: {dupes})", "WARN")
+# A chunk must not be out-scored by any OTHER chunk. Identical twins (same text) tie with it
+# and are allowed: they are the same page photocopied, not a defect of the index.
+TOL = 1e-4
+bad = []
+for i in sample:
+    s = idx.vectors @ idx.vectors[i]
+    if s[i] < s.max() - TOL:
+        bad.append(idx.ids[i])
+check(not bad, f"{len(sample)} sampled chunks are never out-scored by another chunk (ties allowed)"
+      + (f" - failing: {bad[:3]}" if bad else ""))
+texts = [c.get("embedding_text") or c.get("text", "") for c in chunks]
+twins = len(texts) - len(set(texts))
+print(f"  (info) {twins} chunk(s) have text identical to another chunk (duplicate boilerplate)")
+sub = idx.vectors[:: max(1, len(idx) // 500)]
+dupes = len(sub) - len({tuple(np.round(v, 4)) for v in sub})
+check(dupes < 0.1 * len(sub) + 5, f"vectors are not degenerate (identical vectors in a sample of {len(sub)}: {dupes})", "WARN")
 print(f"  (info) model: {m['model']} | dim {m['dim']} | built {m['created_at']}")
 print("\nRESULT:", "ALL CHECKS PASSED" if not fails else f"{fails} CHECK(S) FAILED")
 sys.exit(1 if fails else 0)
