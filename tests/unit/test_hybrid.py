@@ -154,6 +154,30 @@ class HybridRetrieverTests(unittest.TestCase):
         self.assertEqual(best[0].id_matches, ["CVE-2024-3400"])
         self.assertIn("id:CVE-2024-3400", best[0].via)
 
+    def test_keyword_weight_applies_only_when_cve_or_technique_in_question(self):
+        def expected(h, w):
+            e = w / (60 + h.bm25_rank) if h.bm25_rank else 0.0
+            return e + (1 / (60 + h.dense_rank) if h.dense_rank else 0.0)
+        r = HybridRetriever(self.idx, self.chunks, self.emb, mode="hybrid", id_weight=3.0)
+        for q, w in (("Which advisory discusses CVE-2024-3400?", 3.0),
+                     ("Which advisory describes technique T1566?", 3.0),
+                     ("firewall patches", 1.0),
+                     ("In AA20-302A which malware was used?", 1.0)):
+            for h in r.retrieve(q, 4):
+                self.assertAlmostEqual(h.score, expected(h, w), places=9, msg=q)
+
+    def test_id_weight_one_restores_milestone8_scores(self):
+        r = HybridRetriever(self.idx, self.chunks, self.emb, mode="hybrid", id_weight=1.0)
+        for h in r.retrieve("Which advisory discusses CVE-2024-3400?", 4):
+            exp = (1 / (60 + h.bm25_rank) if h.bm25_rank else 0.0) + (1 / (60 + h.dense_rank) if h.dense_rank else 0.0)
+            self.assertAlmostEqual(h.score, exp, places=9)
+
+    def test_heavy_keyword_weight_puts_the_id_chunk_first_despite_misleading_dense(self):
+        emb = FakeEmbedder(fixed_query_text="Phishing attachments T1566 delivered loaders")
+        top = HybridRetriever(self.idx, self.chunks, emb, mode="hybrid", id_weight=50.0).retrieve(
+            "Which advisory discusses CVE-2024-3400?", 1)[0]
+        self.assertIn("CVE-2024-3400", top.chunk["cve_ids"])
+
     def test_unknown_identifier_changes_nothing(self):
         q = "Which advisory discusses CVE-2099-9999 firewall?"
         a = [h.chunk_id for h in self.r("hybrid").retrieve(q, 5)]

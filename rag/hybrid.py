@@ -11,6 +11,9 @@ Reciprocal Rank Fusion: every ranked list gives a chunk  weight / (rrf_k + rank)
 points are added up across lists.  A chunk that is high in BOTH lists wins, and the raw
 scores (cosine vs BM25) never have to be put on a common scale.
 
+Keyword weight (8.1): if the question names a CVE or technique id, BM25 votes id_weight (3x)
+as strongly, because embeddings are blind to identifiers.
+
 Identifier tier (hybrid_ids): if the question contains CVE-2024-3400, T1059.001 or
 AA20-302A, chunks whose structured fields (cve_ids / technique_ids / doc_id) contain that
 identifier receive a bonus larger than anything RRF can award, so they are listed first.
@@ -71,7 +74,7 @@ class HybridRetriever:
 
     def __init__(self, index: VectorIndex, chunks: list[dict], embedder=None, mode: str = "hybrid_ids",
                  rrf_k: int = 60, depth: int = 100, w_dense: float = 1.0, w_bm25: float = 1.0,
-                 exact_boost: float = 0.10, related_boost: float = 0.05):
+                 exact_boost: float = 0.10, related_boost: float = 0.05, id_weight: float = 3.0):
         if mode not in MODES:
             raise ValueError(f"mode must be one of {MODES}")
         if mode in ("dense", "hybrid", "hybrid_ids") and embedder is None:
@@ -79,6 +82,7 @@ class HybridRetriever:
         self.index, self.embedder, self.mode = index, embedder, mode
         self.rrf_k, self.depth, self.w_dense, self.w_bm25 = rrf_k, depth, w_dense, w_bm25
         self.exact_boost, self.related_boost = exact_boost, related_boost
+        self.id_weight = id_weight
         self.by_id = {c["chunk_id"]: c for c in chunks}
         missing = [i for i in index.ids if i not in self.by_id]
         if missing:
@@ -158,11 +162,16 @@ class HybridRetriever:
             dense_rank[row] = r
         for r, (row, _) in enumerate(self.bm25.search(question, depth), start=1):
             bm25_rank[row] = r
+        # Milestone 8.1: when the question names a CVE or technique id, the embedding search is
+        # blind to it (it measured 0.025 doc-hit@1 on technique ids) so the keyword list gets
+        # id_weight times the voting power. Advisory ids alone do not change the weights.
+        ids = extract_identifiers(question)
+        w_bm25 = self.w_bm25 * (self.id_weight if (ids["cve"] or ids["technique"]) else 1.0)
         fused: dict[int, float] = {}
         for row, r in dense_rank.items():
             fused[row] = fused.get(row, 0.0) + self.w_dense / (self.rrf_k + r)
         for row, r in bm25_rank.items():
-            fused[row] = fused.get(row, 0.0) + self.w_bm25 / (self.rrf_k + r)
+            fused[row] = fused.get(row, 0.0) + w_bm25 / (self.rrf_k + r)
         bonuses = self.id_bonuses(question) if self.mode == "hybrid_ids" else {}
         for row, (b, _) in bonuses.items():
             # a bonus row may be outside both depth lists; it still enters the pool

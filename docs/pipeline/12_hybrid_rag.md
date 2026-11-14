@@ -59,6 +59,23 @@ Inside a bonus group the normal merged order decides. If the identifier is in no
 - The `titles` rows check that ordinary semantic questions did not get worse. Five questions is a small guard, so add more.
 
 ## 6. Honest limits
-- Written and tested on a synthetic mini-corpus: 23 new unit tests plus the 20 from Milestone 7, but **not run against the real 2,734 chunks or the real embedding model**. Real numbers come from your machine.
+- Verified on the real corpus (2,734 chunks) on 2026-11-14; the numbers are in the change report.
 - My unit tests caught one bug before delivery: the first tokenizer also split identifiers into loose pieces (`2024`, `3400`), which would have added noise.
 - Rank-fusion constants (60, depth 100, bonuses) are standard defaults, not tuned.
+
+## 7. Milestone 8.1 - what the first real run showed, and the follow-up
+Real results (2026-11-14): BM25 alone reached 0.80 doc-hit@1 on technique questions, but plain `hybrid`
+only 0.125 - worse than BM25 alone and, at top-10, worse than dense alone.
+
+Why: rank fusion is a vote. With one vote each, the embedding list - which is blind to identifiers and
+returns near-random chunks for them - cancels out the keyword list. Picture two judges where one has
+never seen the answer sheet: giving both an equal vote drags the good judge's score down.
+
+Change: when the question contains a CVE or technique id, the keyword list gets `id_weight` (default 3)
+times the votes. Questions without such an id, and questions naming only an advisory id, are unchanged.
+`python rag\compare.py` now accepts `mode:weight` (default run: `dense,bm25,hybrid:1,hybrid:3,hybrid_ids:3`),
+so the weight can be judged from numbers: `hybrid:1` is the old behaviour.
+
+Diagnostic: 15% of technique questions were missed by BM25 even at top-10. `scripts/diagnose_bm25_misses.py`
+sorts each miss into A (id in the structured field but not in the chunk text), B (id in the text but not
+indexed by the tokenizer) or C (indexed but out-ranked), and prints the raw characters around the id.

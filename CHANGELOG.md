@@ -3,6 +3,16 @@
 Record every meaningful change here (date, milestone, files added/changed, dependencies,
 commands run, tests performed, known limitations).
 
+## Milestone 8.1 - identifier-weighted fusion
+- `rag/hybrid.py`: keyword search votes `id_weight` (3x) in rank fusion when the question names a CVE or technique id.
+- `rag/compare.py`: modes accept `mode:weight` (e.g. `hybrid:1,hybrid:3,hybrid:5`).
+- New `scripts/diagnose_bm25_misses.py`: classifies keyword-search misses as data, tokenizer or ranking problems.
+- Docs: decision 0010, section 7 of `docs/pipeline/12_hybrid_rag.md`.
+
+## Milestone 8 - hybrid retrieval
+- Added `rag/bm25.py`, `rag/hybrid.py`, `rag/compare.py`: BM25 keyword search fused with the embedding search (RRF) plus an identifier lookup tier; `ask.py --mode` (default `hybrid_ids`).
+- Fixed deterministic tie-breaking in `rag/index.py` and two faulty checks in `scripts/check_rag_index.py`.
+
 ## Milestone 7 - naive RAG baseline
 - Added `rag/`: local embeddings (BAAI/bge-small-en-v1.5), exact vector index over 2734 chunks, Groq `openai/gpt-oss-20b` answers with checked [chunk_id] citations.
 - Added retrieval evaluation (identifier probes + curated questions) as the baseline for Milestone 8.

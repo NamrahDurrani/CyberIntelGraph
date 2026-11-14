@@ -80,26 +80,29 @@ def main():
     ap.add_argument("--index", default=DEFAULT_INDEX_DIR)
     ap.add_argument("--curated", default=os.path.join("config", "rag_eval_questions.json"))
     ap.add_argument("--titles", default=os.path.join("config", "hybrid_eval_questions.json"))
-    ap.add_argument("--modes", default=",".join(MODES))
+    ap.add_argument("--modes", default="dense,bm25,hybrid:1,hybrid:3,hybrid_ids:3",
+                    help="comma list of mode or mode:id_weight, e.g. hybrid:1,hybrid:3,hybrid:5")
     ap.add_argument("--max-each", type=int, default=40)
     ap.add_argument("--report-dir", default=os.path.join("outputs", "reports"))
     a = ap.parse_args()
     modes = [m.strip() for m in a.modes.split(",") if m.strip()]
     for m in modes:
-        if m not in MODES:
-            sys.exit(f"unknown mode {m!r}; choose from {MODES}")
+        if m.split(":")[0] not in MODES:
+            sys.exit(f"unknown mode {m!r}; choose from {MODES} (optionally mode:id_weight)")
 
     from rag.index import VectorIndex, load_chunks
     chunks = load_chunks(a.chunks)
     index = VectorIndex.load(a.index)
     embedder = None
-    if any(m != "bm25" for m in modes):
+    if any(m.split(":")[0] != "bm25" for m in modes):
         from rag.embedder import SentenceTransformerEmbedder
         embedder = SentenceTransformerEmbedder(index.manifest["model"])
     probes = (make_identifier_probes(chunks, a.max_each) + load_curated(a.curated) + load_titles(a.titles))
     results = {}
     for m in modes:
-        results[m] = evaluate(HybridRetriever(index, chunks, embedder, mode=m), probes)
+        name, _, w = m.partition(":")
+        kw = {"id_weight": float(w)} if w else {}
+        results[m] = evaluate(HybridRetriever(index, chunks, embedder, mode=name, **kw), probes)
         print(f"evaluated mode {m}", flush=True)
     print_tables(results)
     verdict = baseline_check(results["dense"], a.report_dir) if "dense" in results else ""
