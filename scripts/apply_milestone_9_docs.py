@@ -5,8 +5,8 @@ import os
 import re
 import sys
 
-MARK_CL = "## Milestone 9 - GraphRAG-style indexing"
-MARK_ST = "## Milestone 9 - done"
+MARK_CL = "## Milestone 9 - GraphRAG indexing (own extraction pipeline)"
+MARK_ST = "## Milestone 9 - own pipeline done; official GraphRAG run pending (decision 0012)"
 
 
 def read(p):
@@ -35,7 +35,7 @@ REPORT = os.path.join("docs", f"CHANGE_REPORT_{date}_M9_graphrag.md")
 dropped = S["dropped"]
 titles = "\n".join(f"- **{r['community_id']}** ({r['size']} entities): {r['title']} - {r['summary'][:180]}"
                    for r in reports if "error" not in r)
-write(REPORT, f"""# Change report - Milestone 9: GraphRAG-style indexing
+write(REPORT, f"""# Change report - Milestone 9: GraphRAG indexing (own extraction pipeline)
 
 ## What was built
 `graphrag_engine/` - select a small advisory subset, extract entities and relationships with the LLM
@@ -88,7 +88,7 @@ if os.path.exists("PROJECT_STATUS.md"):
         out.append(line)
     t2 = "".join(out)
     if MARK_ST not in t2:
-        t2 = t2.rstrip("\n") + (f"\n\n{MARK_ST}\n- GraphRAG-style index over {S['advisories']} advisories: {S['entities']} entities, "
+        t2 = t2.rstrip("\n") + (f"\n\n{MARK_ST}\n- GraphRAG index (own extraction pipeline) over {S['advisories']} advisories: {S['entities']} entities, "
                                 f"{S['relationships']} relationships, {S['communities']} communities, {S['communities_reported']} reports "
                                 f"(see `{REPORT.replace(os.sep, '/')}`).\n- Next: Milestone 10 (GraphRAG -> Neo4j).\n")
     if t2 != t:

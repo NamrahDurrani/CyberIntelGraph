@@ -1,6 +1,6 @@
-# Decision 0011 - GraphRAG method, own lightweight implementation (Milestone 9)
+# Decision 0011 - Our own GraphRAG extraction pipeline (baseline)
 
-Status: accepted - 2026-11-14
+Status: partly superseded by decision 0012 (the official GraphRAG run). This pipeline stays as our grounded-extraction baseline.
 
 ## Context
 The roadmap says "Microsoft GraphRAG on a small advisory subset". A dry-run of `pip install graphrag`
@@ -14,8 +14,7 @@ that were never verified (project report, section 15).
    build a graph, detect communities, write community reports, answer broad questions by map-reduce over the
    reports (global search). One new small dependency: `networkx`.
 2. Differences from Microsoft's package, stated openly: Louvain (one level) instead of hierarchical Leiden; no
-   local-search / embedding index; extraction prompt and report format are ours. Keeping the name
-   "GraphRAG-style" in documents; the official package stays possible later as a comparison (Milestone 17).
+   local-search / embedding index; extraction prompt and report format are ours. Superseded for the official run by decision 0012; the official package stays possible later as a comparison (Milestone 17).
 3. Cost control is part of the design: 5 advisories by default, text packed into ~1,400-word windows
    (about 7 calls per advisory instead of one per chunk), a hard `--max-calls` budget, pacing between calls,
    an on-disk cache so a rate-limit stop resumes without repeating work, and `--dry-run` that estimates cost first.

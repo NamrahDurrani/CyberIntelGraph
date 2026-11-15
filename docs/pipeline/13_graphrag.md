@@ -1,4 +1,4 @@
-# 13 - Milestone 9: GraphRAG-style indexing - what changed and why
+# 13 - Milestone 9: GraphRAG indexing (own extraction pipeline) - what changed and why
 
 ## 0. First: what your Milestone 8.1 numbers mean
 | Result | Meaning |

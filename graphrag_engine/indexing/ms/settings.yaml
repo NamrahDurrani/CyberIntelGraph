@@ -1,0 +1,134 @@
+### Microsoft GraphRAG 3.x settings for CyberIntelGraph (Milestone 9) ###
+## Project root = this folder. Run from the dedicated graphrag venv:
+##   graphrag index --root graphrag_engine\indexing\ms
+## Chat model : Groq openai/gpt-oss-20b (GROQ_API_KEY from the environment; never written here).
+## Embeddings : local bge-small through scripts\serve_local_embeddings.py (Groq has no embeddings API).
+## Every limit below marked CHECK is a conservative GUESS - read your real limits at console.groq.com/settings/limits.
+
+completion_models:
+  default_completion_model:
+    model_provider: groq
+    model: openai/gpt-oss-20b
+    auth_method: api_key
+    api_key: ${GROQ_API_KEY}
+    call_args:
+      temperature: 0.1
+      max_completion_tokens: 3000     # CHECK: counts toward Groq's per-request / per-minute token limit
+      reasoning_effort: low
+    retry:
+      type: exponential_backoff
+      max_retries: 8
+    rate_limit:
+      type: sliding_window
+      period_in_seconds: 60
+      requests_per_period: 20         # CHECK: free-tier requests per minute
+      tokens_per_period: 6500         # CHECK: free-tier tokens per minute (keep below your real limit)
+
+embedding_models:
+  default_embedding_model:
+    model_provider: openai            # the local server speaks the OpenAI embeddings protocol
+    model: bge-small-en-v1.5
+    api_base: http://127.0.0.1:8008/v1
+    auth_method: api_key
+    api_key: local-embedding-server   # not a secret; the local server ignores it
+    retry:
+      type: exponential_backoff
+      max_retries: 4
+
+concurrent_requests: 1                # one LLM call at a time: gentle on a free tier
+
+### Document processing ###
+input:
+  type: text                          # one .txt file per advisory (scripts/prepare_ms_graphrag_input.py)
+
+chunking:
+  type: tokens
+  size: 500                           # smaller than the default 1200: prompt + chunk + reply must fit Groq's request limit
+  overlap: 50
+  encoding_model: o200k_base
+
+### Storage: everything under data/graphrag_outputs (git-ignored) ###
+input_storage:
+  type: file
+  base_dir: "../../../data/graphrag_outputs/input"
+
+output_storage:
+  type: file
+  base_dir: "../../../data/graphrag_outputs/output"
+
+reporting:
+  type: file
+  base_dir: "../../../data/graphrag_outputs/logs"
+
+cache:
+  type: json
+  storage:
+    type: file
+    base_dir: "../../../data/graphrag_outputs/cache"
+
+vector_store:
+  type: lancedb
+  db_uri: ../../../data/graphrag_outputs/output/lancedb
+
+### Workflows ###
+embed_text:
+  embedding_model_id: default_embedding_model
+
+extract_graph:
+  completion_model_id: default_completion_model
+  prompt: "prompts/extract_graph.txt"
+  entity_types: [threat_actor, malware, tool, vulnerability, attack_technique, software, organization, campaign, mitigation, sector]
+  max_gleanings: 0                    # no extra "did you miss any?" pass: halves the calls
+
+summarize_descriptions:
+  completion_model_id: default_completion_model
+  prompt: "prompts/summarize_descriptions.txt"
+  max_length: 300
+
+extract_graph_nlp:
+  text_analyzer:
+    extractor_type: regex_english
+
+cluster_graph:
+  max_cluster_size: 10
+
+extract_claims:
+  enabled: false
+  completion_model_id: default_completion_model
+  prompt: "prompts/extract_claims.txt"
+  description: "Any claims or facts that could be relevant to information discovery."
+  max_gleanings: 0
+
+community_reports:
+  completion_model_id: default_completion_model
+  graph_prompt: "prompts/community_report_graph.txt"
+  text_prompt: "prompts/community_report_text.txt"
+  max_length: 1500
+  max_input_length: 2500              # CHECK: default 8000 would exceed a small per-request limit
+
+snapshots:
+  graphml: true                       # also write a .graphml file: easy to inspect in a graph viewer
+  embeddings: false
+
+### Query (used later) ###
+local_search:
+  completion_model_id: default_completion_model
+  embedding_model_id: default_embedding_model
+  prompt: "prompts/local_search_system_prompt.txt"
+
+global_search:
+  completion_model_id: default_completion_model
+  map_prompt: "prompts/global_search_map_system_prompt.txt"
+  reduce_prompt: "prompts/global_search_reduce_system_prompt.txt"
+  knowledge_prompt: "prompts/global_search_knowledge_system_prompt.txt"
+
+drift_search:
+  completion_model_id: default_completion_model
+  embedding_model_id: default_embedding_model
+  prompt: "prompts/drift_search_system_prompt.txt"
+  reduce_prompt: "prompts/drift_search_reduce_prompt.txt"
+
+basic_search:
+  completion_model_id: default_completion_model
+  embedding_model_id: default_embedding_model
+  prompt: "prompts/basic_search_system_prompt.txt"

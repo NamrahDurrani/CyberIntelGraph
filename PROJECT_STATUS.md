@@ -39,6 +39,6 @@ Install the patch, run the CWE check and the audit, paste the audit summary, the
 - Hybrid retrieval (dense + BM25 + identifier lookup) measured against the Milestone 7 baseline; see `docs/CHANGE_REPORT_2026-11-14_M8_hybrid-rag.md`.
 - Next: Milestone 9 (see the roadmap in the project report).
 
-## Milestone 9 - done
-- GraphRAG-style index over 5 advisories: 220 entities, 165 relationships, 62 communities, 12 reports (see `docs/CHANGE_REPORT_2026-11-15_M9_graphrag.md`).
+## Milestone 9 - own pipeline done; official GraphRAG run pending (decision 0012)
+- GraphRAG index (own extraction pipeline) over 5 advisories: 220 entities, 165 relationships, 62 communities, 12 reports (see `docs/CHANGE_REPORT_2026-11-15_M9_graphrag.md`).
 - Next: Milestone 10 (GraphRAG -> Neo4j).

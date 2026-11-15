@@ -1,4 +1,4 @@
-# Change report - Milestone 9: GraphRAG-style indexing
+# Change report - Milestone 9: GraphRAG indexing (own extraction pipeline)
 
 ## What was built
 `graphrag_engine/` - select a small advisory subset, extract entities and relationships with the LLM
