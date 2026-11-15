@@ -110,7 +110,9 @@ class HybridRetriever:
                     x = x.upper()
                     tech.setdefault(x, []).append(r)
                     if "." in x:
-                        child.setdefault(x.split(".")[0], []).append(r)
+                        rows = child.setdefault(x.split(".")[0], [])
+                        if r not in rows:          # a chunk with T1090.002 AND T1090.003 counts once
+                            rows.append(r)
                 for a in set(_ADV_DOC.findall((c.get("doc_id") or "").lower())):
                     adv.setdefault(a, []).append(r)
             self._id_maps = (cve, tech, child, adv)

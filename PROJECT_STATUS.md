@@ -34,4 +34,11 @@ Install the patch, run the CWE check and the audit, paste the audit summary, the
 
 ## Milestone 7 - done
 - Naive RAG baseline: 2734 chunks indexed, Groq gpt-oss-20b answers with citations.
-- Next: Milestone 8 (hybrid retrieval: BM25 + semantic).
+
+## Milestone 8 - done
+- Hybrid retrieval (dense + BM25 + identifier lookup) measured against the Milestone 7 baseline; see `docs/CHANGE_REPORT_2026-11-14_M8_hybrid-rag.md`.
+- Next: Milestone 9 (see the roadmap in the project report).
+
+## Milestone 9 - done
+- GraphRAG-style index over 5 advisories: 220 entities, 165 relationships, 62 communities, 12 reports (see `docs/CHANGE_REPORT_2026-11-15_M9_graphrag.md`).
+- Next: Milestone 10 (GraphRAG -> Neo4j).

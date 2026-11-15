@@ -178,6 +178,19 @@ class HybridRetrieverTests(unittest.TestCase):
             "Which advisory discusses CVE-2024-3400?", 1)[0]
         self.assertIn("CVE-2024-3400", top.chunk["cve_ids"])
 
+    def test_two_subtechniques_of_one_parent_do_not_double_the_related_bonus(self):
+        chunks = CHUNKS + [chunk("cisa-advisory-aa27-004a", 1, "Proxy use T1090.002 and T1090.003 observed",
+                                 techs=["T1090.002", "T1090.003"]),
+                           chunk("cisa-advisory-aa27-004a", 2, "Plain proxy T1090 described", techs=["T1090"])]
+        idx, ch = build(tempfile.mkdtemp(), chunks)
+        r = HybridRetriever(idx, ch, FakeEmbedder(), mode="hybrid_ids")
+        bonus = r.id_bonuses("Which advisory describes technique T1090?")
+        by_chunk = {ch_["chunk_id"]: bonus[i][0] for i, ch_ in enumerate(r.rows) if i in bonus}
+        self.assertAlmostEqual(by_chunk["advisory_cisa-advisory-aa27-004a_chunk_002"], 0.10)   # exact
+        self.assertAlmostEqual(by_chunk["advisory_cisa-advisory-aa27-004a_chunk_001"], 0.05)   # related, once
+        self.assertEqual(r.retrieve("Which advisory describes technique T1090?", 1)[0].chunk_id,
+                         "advisory_cisa-advisory-aa27-004a_chunk_002")
+
     def test_unknown_identifier_changes_nothing(self):
         q = "Which advisory discusses CVE-2099-9999 firewall?"
         a = [h.chunk_id for h in self.r("hybrid").retrieve(q, 5)]

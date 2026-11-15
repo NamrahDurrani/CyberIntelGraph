@@ -3,6 +3,11 @@
 Record every meaningful change here (date, milestone, files added/changed, dependencies,
 commands run, tests performed, known limitations).
 
+## Milestone 9 - GraphRAG-style indexing
+- New `graphrag_engine/`: advisory selection, grounded LLM extraction (cached, paced, call-budgeted), canonical linking, Louvain communities, community reports, global search.
+- New `scripts/check_graphrag_output.py`; decision 0011; `docs/pipeline/13_graphrag.md`.
+- Also: related-bonus double-count fix in `rag/hybrid.py`.
+
 ## Milestone 8.1 - identifier-weighted fusion
 - `rag/hybrid.py`: keyword search votes `id_weight` (3x) in rank fusion when the question names a CVE or technique id.
 - `rag/compare.py`: modes accept `mode:weight` (e.g. `hybrid:1,hybrid:3,hybrid:5`).
