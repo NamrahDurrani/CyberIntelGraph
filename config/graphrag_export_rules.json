@@ -1,0 +1,16 @@
+{
+  "note": "STARTER rules written from the first pilot advisory (aa22-103a). Review them against your own output (scripts/apply_milestone_9b_docs.py prints the top entities) and extend. Titles are compared upper-case.",
+  "type_map": {
+    "THREAT_ACTOR": "ThreatActor", "MALWARE": "Malware", "TOOL": "Tool", "VULNERABILITY": "Vulnerability",
+    "ATTACK_TECHNIQUE": "AttackTechnique", "SOFTWARE": "Software", "ORGANIZATION": "Organization",
+    "CAMPAIGN": "Campaign", "MITIGATION": "Mitigation", "SECTOR": "Sector"
+  },
+  "extension_types": ["Sector"],
+  "generic_titles": ["TOOL", "TOOLS", "APT ACTORS", "THREAT ACTORS", "ATTACKERS", "ADVERSARIES", "MITIGATIONS",
+                     "MITIGATION", "ORGANIZATION", "ORGANIZATIONS", "SYSTEMS", "DEVICES", "VULNERABILITIES",
+                     "MALWARE", "SOFTWARE", "VENDORS", "USERS", "NETWORKS"],
+  "advisory_author_orgs": ["CISA", "NSA", "FBI", "DOE", "DEPARTMENT OF ENERGY", "US DEPARTMENT OF ENERGY",
+                           "FEDERAL BUREAU OF INVESTIGATION", "NATIONAL SECURITY AGENCY",
+                           "CYBERSECURITY AND INFRASTRUCTURE SECURITY AGENCY"],
+  "merge_aliases": {"OT": "OPERATIONAL TECHNOLOGIES", "OPERATIONAL TECHNOLOGY": "OPERATIONAL TECHNOLOGIES"}
+}

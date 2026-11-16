@@ -10,3 +10,4 @@ pydantic>=2
 docling
 sentence-transformers
 networkx
+neo4j
