@@ -3,7 +3,7 @@
 Rule: finish and **test** one milestone before starting the next. At the end of each one:
 update `CHANGELOG.md` + `PROJECT_STATUS.md`, then `git add . ; git commit -m "Milestone N: ..." ; git push`.
 
-Always run commands from the project folder with the venv active (`(.venv)` in the prompt). Type `cig` to get there from any terminal (see `docs/PROJECT_LOCATION.md`).
+Always run commands from `C:\CyberIntelGraph` with the venv active (`(.venv)` in the prompt).
 
 Package rule: install ONLY what the current milestone lists, then record it in `requirements.txt`
 (`python -m pip freeze` is too noisy - add the top-level package names by hand).
@@ -33,6 +33,7 @@ Package rule: install ONLY what the current milestone lists, then record it in `
 **Done when:** raw file exists in `data/raw/<source>/`, record count and required fields validated, no duplicates.
 
 ## Milestone 4 - Raw data validation and storage
+**Status:** passed 2026-11-10 (0 FAIL)
 **Goal:** prove the whole raw data layer is complete, untouched, fresh, consistent across sources, documented and kept out of Git.
 **Analogy:** the surveyor's visit before an architect designs the house.
 **Built:** `ingestion/validation/audit_raw_data.py` (one command for all five sources), `config/dataset_targets.json`, `scripts/protect_raw_data.ps1` (optional read-only protection), generated `docs/data_dictionary/RAW_DATA_AUDIT.md`. Details: `docs/pipeline/08_raw_data_audit.md`, decision 0005.
@@ -41,6 +42,7 @@ Package rule: install ONLY what the current milestone lists, then record it in `
 **Done when:** the audit prints no FAIL on your PC, the advisories reach their target (or the shortfall is explained), the generated audit document is committed, and the data dictionary pages are no longer marked "not verified".
 
 ## Milestone 5 - Canonical schemas and normalization
+**Status:** done - 6,207 entities, 28,361 relationships (5.1)
 **Goal:** one official shape for every entity so duplicates merge (CVE-2024-3400 from NVD + KEV + advisories = ONE Vulnerability node with several evidence records).
 **Folders:** `canonical/schemas`, `canonical/entities`, `canonical/relationships`, `canonical/provenance`, `ingestion/normalization`.
 **Packages:** `python -m pip install pydantic`
@@ -50,6 +52,7 @@ Package rule: install ONLY what the current milestone lists, then record it in `
 **Done when:** normalized files in `data/processed/` pass schema validation and CVE IDs are unique.
 
 ## Milestone 6 - Document processing and chunking (Docling)
+**Status:** done - 2,734 chunks from 53 advisories
 **Goal:** turn PDF/DOCX/HTML advisories into clean, chunked text with page/section references.
 **Folders:** `ingestion/document_processing`, `ingestion/chunking`, `data/documents`, `data/chunks`.
 **Packages (large - check disk first):** `python -m pip install docling tiktoken` (check `Get-PSDrive D` before; set `$env:PIP_CACHE_DIR="D:\pip_cache"`).
@@ -57,17 +60,20 @@ Package rule: install ONLY what the current milestone lists, then record it in `
 **Done when:** every document has a stable `document_id`; every chunk has a stable `chunk_id`, page/section, and tables are preserved.
 
 ## Milestone 7 - Naive RAG baseline
+**Status:** done
 **Goal:** the simplest retrieval (embed chunks, find nearest) so later methods have something to beat.
 **Folders:** `graphrag_engine/retrieval` (or a new `baselines/` decision recorded in `docs/decisions`).
 **Packages:** an embedding client for your hosted BGE-M3-compatible endpoint plus a lightweight vector index (decide in an ADR; do not download local LLMs).
 **Done when:** you can ask a question and get top-K chunks with source URLs.
 
 ## Milestone 8 - Hybrid RAG (vector + keyword)
+**Status:** done - hybrid_ids top-1 1.0 CVE / 0.975 technique
 **Packages:** `python -m pip install rank-bm25`
 **Idea:** vector search finds meaning ("sounds like"), keyword search finds exact strings (CVE IDs). Merge both.
 **Done when:** CVE-ID queries hit exactly and conceptual queries still work.
 
 ## Milestone 9 - Microsoft GraphRAG indexing
+**Status:** done - own lightweight GraphRAG (9.1) + official pilot (9b); official searches not yet demonstrated
 **Goal:** run GraphRAG on selected normalized documents; get entities, relationships, communities, community reports.
 **Before installing:** check the GraphRAG version and whether it supports Python 3.12; if it conflicts, put it in its own venv and record that in `docs/decisions/`.
 **Folders:** `graphrag_engine/indexing`, `data/graphrag_outputs`.
@@ -76,6 +82,7 @@ Package rule: install ONLY what the current milestone lists, then record it in `
 **Done when:** output files exist and you have **inspected the real output schema** (do not assume column names).
 
 ## Milestone 10 - GraphRAG output inspection and Neo4j synchronization
+**Status:** done and verified 2026-11-17 - 6,313 nodes, 28,616 relationships, idempotent
 **Folders:** `graphrag_engine/export`, `graphrag_engine/synchronization`.
 **Packages:** `python -m pip install neo4j`
 **Neo4j hosting:** the free hosted Aura tier avoids using local disk; Docker/Desktop also work.
@@ -83,6 +90,7 @@ Package rule: install ONLY what the current milestone lists, then record it in `
 **Done when:** running the sync twice produces the same node/relationship counts.
 
 ## Milestone 11 - Neo4j schema and Cypher retrieval
+**Status:** built and unit-tested 2026-11-18; live check pending (neo4j_engine/, scripts/check_neo4j_retrieval.py)
 **Folders:** `neo4j_engine/schema`, `queries`, `repositories`.
 **Do:** constraints + indexes, then query functions: entity lookup, one-hop, multi-hop, evidence lookup, provenance, temporal.
 **Done when:** "techniques for threat actor X" returns techniques **with evidence**, marking documented vs inferred.

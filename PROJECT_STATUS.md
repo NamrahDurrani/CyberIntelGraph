@@ -1,44 +1,39 @@
 # Project Status
 
-**Current milestone:** 4 - Raw data audit: run on your PC; one follow-up fix delivered (CWE check); then commit and close
+**Current milestone:** 11 - Cypher retrieval on Neo4j: built and unit-tested; live check on Aura pending
+**Last updated:** 2026-11-18
 
 ## Completed
-- [x] Milestones 1 and 3 (gate passed on your PC); problems found in that run fixed
-- [x] Advisories: 53 documents, all dated, derived dates validated (19/19 agree with stated dates), target 50-75 met
-- [x] Milestone 4 audit run on your PC: all five dataset targets MET, sources agree (NVD vs KEV dates 150/150), no data tracked by Git, 211 raw files verified
-- [x] CWE parser fix works for the data (8 missing ids found); CWE check wording fixed (any non-weakness kind counts) and ICS technique ids classified in the audit
-- [ ] Patch installed; `python scripts\check_cwe_output.py` passes; `python ingestion\validation\audit_raw_data.py --write-doc` prints **no FAIL**
-- [ ] `docs/data_dictionary/RAW_DATA_AUDIT.md` read (field inventory) and committed
-- [ ] Everything committed and pushed (code, docs, audit document)
-- [ ] `cig doctor` output seen (location tooling confirmed on your PC)
+- [x] Milestone 1-3: environment, decisions, five collectors (KEV, NVD, ATT&CK, CWE, advisories)
+- [x] Milestone 4: raw data audit passed (0 FAIL) on 2026-11-10
+- [x] Milestone 5 / 5.1: canonical model - 6,207 entities, 28,361 relationships after the KEV CWE fix (HAS_WEAKNESS 171 -> 1,755)
+- [x] Milestone 6: Docling chunking - 2,734 chunks from 53 advisories
+- [x] Milestone 7: naive RAG baseline (Groq gpt-oss-20b)
+- [x] Milestone 8 / 8.1: hybrid retrieval (BM25 + dense + identifier bonus); `hybrid_ids` top-1 1.0 CVE / 0.975 technique
+- [x] Milestone 9 / 9.1: own lightweight GraphRAG; first real run on 5 advisories (19 of 20 windows)
+- [x] Milestone 9b: official Microsoft GraphRAG pilot on advisory aa22-103a
+- [x] Milestone 10: canonical + GraphRAG into Neo4j Aura - 6,313 nodes, 28,616 relationships, idempotent, `check_neo4j_graph.py` ALL CHECKS PASSED (2026-11-17)
+- [x] Milestone 11 code: `neo4j_engine/` (read-only Cypher retrieval), CLI, live check script; 34 offline unit tests pass
+
+## To do for Milestone 11 (on your PC)
+- [ ] `python -m unittest tests.unit.test_neo4j_retrieval -v` -> `Ran 34 tests` and `OK`
+- [ ] `python neo4j_engine\cli.py schema --write` (see which property names were resolved) then `schema --apply-indexes`
+- [ ] `python scripts\check_neo4j_retrieval.py` prints `ALL CHECKS PASSED`
+- [x] verified 2026-11-19 on the real Aura graph: 19 checks passed, 2 warning(s); example Kimsuky: {'documented': 130, 'inferred': 58, 'candidate': 0, 'total': 188} <!-- M11-VERIFIED -->
+- [ ] Commit and push
 
 ## Working functionality
-- Five collectors, five check scripts, the gate, the audit, doctor and `cig`
+- Collectors, canonical build, chunking, RAG (`rag\ask.py --mode hybrid_ids`), GraphRAG indexing and global search, Neo4j sync (`graphrag_engine\synchronization\sync_neo4j.py`)
+- Retrieval over the graph: `python neo4j_engine\cli.py actor-techniques "APT29"` (after the live check)
 
 ## Pending
+- Milestone 12: MongoDB persistence | 13: LangGraph supervisor | 14: evidence verification | 15: FastAPI | 16: frontend | 17: evaluation | 18: integration and deployment
+- Official Microsoft GraphRAG: Basic / Local / Global / DRIFT searches and a multi-advisory run are not yet demonstrated
 
 ## Known issues
-- None blocking. The real name of the CWE grouping entries is shown by the collector (`Other entry kinds`)
+- Rotate the Groq key, the NVD key and the Aura password if the old `.env.example` (which contained real-looking values) was ever pushed to GitHub
+- The 18 Nov progress report (PDF/md) still lists Milestone 4 as not signed off; it passed on 2026-11-10
+- Milestone 11 assumes edge directions only for USES (actor -> technique); the live check verifies it
 
 ## Next exact task
-Install the patch, run the CWE check and the audit, paste the audit summary, then commit and push.
-
-## Milestone 5.1 - done (2026-11-10)
-- Canonical graph now links KEV and NVD CWE ids: HAS_WEAKNESS 171 -> 1755.
-- ATT&CK sub-technique parents verified (479/479).
-- Next: Milestone 6 (Docling + chunking of the advisories).
-
-## Milestone 6 - done
-- 2734 advisory chunks from 53 documents (Docling HTML).
-- Next: Milestone 7 (naive RAG).
-
-## Milestone 7 - done
-- Naive RAG baseline: 2734 chunks indexed, Groq gpt-oss-20b answers with citations.
-
-## Milestone 8 - done
-- Hybrid retrieval (dense + BM25 + identifier lookup) measured against the Milestone 7 baseline; see `docs/CHANGE_REPORT_2026-11-14_M8_hybrid-rag.md`.
-- Next: Milestone 9 (see the roadmap in the project report).
-
-## Milestone 9 - own pipeline done; official GraphRAG run pending (decision 0012)
-- GraphRAG index (own extraction pipeline) over 5 advisories: 220 entities, 165 relationships, 62 communities, 12 reports (see `docs/CHANGE_REPORT_2026-11-15_M9_graphrag.md`).
-- Next: Milestone 10 (GraphRAG -> Neo4j).
+Run the Milestone 11 steps above, paste the output of `check_neo4j_retrieval.py` (and `schema`, if any field is reported as not found).

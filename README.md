@@ -7,26 +7,23 @@ CISA advisories), builds one unified knowledge graph (Microsoft GraphRAG + Neo4j
 research questions with citations, source URLs, dates and stated limitations - never with
 unsupported claims.
 
-> **Status:** Milestone 1 verified. Milestone 3 gate passed on the real sources; fixes from that run are delivered (CWE categories, advisory dates and discovery). Milestone 4 (raw data audit) is built. See `PROJECT_STATUS.md`.
+> **Status:** Milestones 1-10 complete (Neo4j Aura sync verified 2026-11-17). Milestone 11 (Cypher retrieval) is built and unit-tested; live check pending. See `PROJECT_STATUS.md` and `docs/CHANGE_REPORT_2026-11-18_M5-M11.md`.
 
 ## Start here (read in this order)
-1. `docs/GETTING_STARTED.md`  - install Python 3.12, create the virtual environment, verify (and `docs/PROJECT_LOCATION.md` if your terminal ever cannot find files)
+1. `docs/GETTING_STARTED.md`  - install Python 3.12, create the virtual environment, verify
 2. `docs/GITHUB_GUIDE.md`     - turn this folder into a GitHub repository
 3. `docs/pipeline/00_milestone_roadmap.md` - the 18 milestones, one by one, with run commands
 4. `docs/architecture/folder_guide.md` - what every folder is for
 
 ## Quick start (Windows PowerShell)
-First time only. Open PowerShell **in the project folder** (the folder that contains this README). The project works from any folder or drive:
 ```powershell
+cd C:\CyberIntelGraph
 .\scripts\setup_env.ps1          # creates .venv with Python 3.12
 .\.venv\Scripts\Activate.ps1     # activate it
 .\scripts\verify_structure.ps1   # checks every folder exists
 Copy-Item .env.example .env      # then fill in keys later, when a milestone needs them
-.\scripts\install_shortcut.ps1   # once: registers the command  cig
 .\scripts\git_init.ps1           # local Git repo + first commit
 ```
-**Every day after that:** open a new terminal anywhere and type `cig` (goes to the project and activates the environment), or `cig doctor` (also runs the health check).
-Lost? `python <project folder>\scripts\doctor.py` tells you what is wrong. See `docs/PROJECT_LOCATION.md`.
 
 ## Technology stack
 Python 3.12 | FastAPI | Pydantic | Docling | Microsoft GraphRAG | Neo4j | MongoDB |
@@ -57,3 +54,24 @@ Run unit tests: `python -m unittest discover -s tests\unit -v`.
 ## Milestone 4: raw data audit
 One command audits all five sources together (raw integrity, freshness, targets, cross-source checks, field inventory, Git hygiene, check scripts, documentation):
 `python ingestion\validation\audit_raw_data.py --write-doc`. Details: `docs/pipeline/08_raw_data_audit.md`. Optional: `.\scripts\protect_raw_data.ps1` makes raw files read-only.
+
+## Milestones 5-10 in one table
+| # | What | Entry point / command | Result |
+|---|---|---|---|
+| 5 | Canonical model | canonical build | 6,207 entities; 28,361 relationships after 5.1 |
+| 6 | Docling chunking | chunking step | 2,734 chunks from 53 advisories |
+| 7-8 | RAG and hybrid retrieval | `python rag\ask.py --mode hybrid_ids "..."`, `python rag\compare.py` | `hybrid_ids` top-1 1.0 (CVE) / 0.975 (technique) |
+| 9 | Own lightweight GraphRAG | `python graphrag_engine\indexing\run_index.py --dry-run` | 220 entities, 165 relationships on 5 advisories |
+| 9b | Official Microsoft GraphRAG pilot | separate `.venv-graphrag` | 106 entities, 81 relationships, 8 communities (aa22-103a) |
+| 10 | Neo4j Aura sync | `python graphrag_engine\synchronization\sync_neo4j.py --verify-twice`, `python scripts\check_neo4j_graph.py` | 6,313 nodes, 28,616 relationships, idempotent |
+
+## Milestone 11: Cypher retrieval (read-only)
+```powershell
+python -m unittest tests.unit.test_neo4j_retrieval -v      # offline tests
+python neo4j_engine\cli.py schema --write --apply-indexes   # discover real property names, add name indexes
+python neo4j_engine\cli.py actor-techniques "APT29"         # techniques marked documented / inferred / candidate
+python scripts\check_neo4j_retrieval.py                     # live gate
+python scripts\apply_milestone_11_docs.py                   # records the real results in the docs
+```
+verified 2026-11-19 on the real Aura graph: 19 checks passed, 2 warning(s); example Kimsuky: {'documented': 130, 'inferred': 58, 'candidate': 0, 'total': 188} <!-- M11-VERIFIED -->
+Explanation: `docs/pipeline/15_neo4j_cypher_retrieval.md`. Credentials live in `.env` (see `.env.example`); never commit real keys.

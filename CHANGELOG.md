@@ -3,64 +3,26 @@
 Record every meaningful change here (date, milestone, files added/changed, dependencies,
 commands run, tests performed, known limitations).
 
-## Milestone 9 - GraphRAG indexing (own extraction pipeline)
-- New `graphrag_engine/`: advisory selection, grounded LLM extraction (cached, paced, call-budgeted), canonical linking, Louvain communities, community reports, global search.
-- New `scripts/check_graphrag_output.py`; decision 0011; `docs/pipeline/13_graphrag.md`.
-- Also: related-bonus double-count fix in `rag/hybrid.py`.
 
-## Milestone 8.1 - identifier-weighted fusion
-- `rag/hybrid.py`: keyword search votes `id_weight` (3x) in rank fusion when the question names a CVE or technique id.
-- `rag/compare.py`: modes accept `mode:weight` (e.g. `hybrid:1,hybrid:3,hybrid:5`).
-- New `scripts/diagnose_bm25_misses.py`: classifies keyword-search misses as data, tokenizer or ranking problems.
-- Docs: decision 0010, section 7 of `docs/pipeline/12_hybrid_rag.md`.
-
-## Milestone 8 - hybrid retrieval
-- Added `rag/bm25.py`, `rag/hybrid.py`, `rag/compare.py`: BM25 keyword search fused with the embedding search (RRF) plus an identifier lookup tier; `ask.py --mode` (default `hybrid_ids`).
-- Fixed deterministic tie-breaking in `rag/index.py` and two faulty checks in `scripts/check_rag_index.py`.
-
-## Milestone 7 - naive RAG baseline
-- Added `rag/`: local embeddings (BAAI/bge-small-en-v1.5), exact vector index over 2734 chunks, Groq `openai/gpt-oss-20b` answers with checked [chunk_id] citations.
-- Added retrieval evaluation (identifier probes + curated questions) as the baseline for Milestone 8.
-
-## Milestone 6 - 2026-11-11 - Docling parsing and advisory chunking
-- Added `documents/` (Docling HTML parser, chunker, builder), checker and tests.
-- Output: `data/processed/advisory_chunks.jsonl` - 2734 chunks from 53 advisories.
-- Each chunk keeps doc id, heading path, source URL, date and raw-file SHA-256.
-
-## Milestone 5.1 - 2026-11-10 - KEV CWE ids now create HAS_WEAKNESS links
-- Fixed: `cwes` on KEV records were ignored; HAS_WEAKNESS is now 1755 (was 171).
-- Changed: `canonical/build.py` (shared `_link_weaknesses`), `canonical/mappings.py` (alias).
-- Added: `tests/unit/test_canonical_kev_cwes.py`, `scripts/apply_milestone_5_1_docs.py`.
-- Verified: 479 sub-techniques still have 479 parent links; entity ids and schema unchanged.
-- Commit 3cd7374 (Milestone 5) intentionally left as is.
-
-## [Audit results on the user's PC and two follow-up fixes] - 2026-11-10
-### Verified on the user's PC (2026-11-09)
-- Advisories: 53 documents (target 50-75 met), every one dated, 34 dates derived from alert codes and **19/19 stated Release Dates agree with the code-derived date**, 20 pages marked Archived, 175 distinct CVEs mentioned (161 in KEV, 36 in the NVD set, 14 in neither); all 14 advisory checks passed
-- Audit: all five dataset targets MET; NVD's embedded CISA dates agree with KEV for all 150 records; nothing from data/outputs/logs/.env is tracked by Git; all raw files verified by SHA-256
-- CWE: the parser fix works for the data (subset 246 -> 254, no more "ids not in the catalog"), but the CWE check still FAILED because it only recognized the element name `Category`
-### Fixed
-- `scripts/check_cwe_output.py`: asks "are there entries besides weaknesses (any kind)?" instead of looking for one element name; prints the kind names; the collector warning is informational when other kinds exist
-- `ingestion/validation/audit_raw_data.py`: ATT&CK-style ids T0800-T0899 (ICS matrix, not collected) are classified as INFO instead of WARN; unknown ids stay WARN; CWE stats carry `other_entries`
-### Tests performed
-- 145 unit tests pass (+2); end-to-end test of the CWE collector and check on a synthetic file with a differently named grouping section: SUCCESS, check passes with the info line
-### Known limitations
-- The real name of the CWE grouping kind is not known to me yet; the collector prints it (`Other entry kinds`)
-- ICS ATT&CK is not collected (decision 0003 amendment): scope question for Milestone 5
-
-## [Location-independent tooling] - 2026-11-04
-### Why
-Commands were run from an old, empty OneDrive folder while the update had been extracted into C:\CyberIntelGraph (`Ran 0 tests`, `[Errno 2]`, `.venv ... not recognized`).
-The code never depended on a fixed path; the instructions and the terminal did.
+## [Milestone 11 - Cypher retrieval on Neo4j] - 2026-11-18
 ### Added
-- `scripts/doctor.py` (project health and location check), `scripts/install_shortcut.ps1` (`cig`, `cig doctor`), `docs/PROJECT_LOCATION.md`,
-  `tests/unit/test_doctor_and_guards.py` (14 tests), `docs/CHANGE_REPORT_2026-11-04_location-independence.md`
+- `neo4j_engine/connection/client.py`, `schema/introspect.py`, `schema/mapping.py`, `schema/indexes.py`, `queries/cypher.py`, `repositories/evidence.py`, `repositories/graph_repository.py`, `cli.py`
+- `scripts/check_neo4j_retrieval.py`, `scripts/apply_milestone_11_docs.py`, `tests/unit/test_neo4j_retrieval.py` (34 tests)
+- `docs/pipeline/15_neo4j_cypher_retrieval.md`, `docs/CHANGE_REPORT_2026-11-18_M5-M11.md`
 ### Changed
-- All five collectors: friendly message and exit code 2 when `requests` / `beautifulsoup4` is not available (global Python)
-- README, GETTING_STARTED, GITHUB_GUIDE, pipeline pages, roadmap, PROJECT_GUIDE: no hard-coded project path (`cig`, `$project` variable)
+- README, PROJECT_STATUS, roadmap status lines, `requirements.txt`, `.env.example` (placeholders only)
+### Dependencies
+- `neo4j` driver (installed for Milestone 10); `python-dotenv` optional
 ### Tests performed
-- 143 unit tests pass; doctor simulated for a OneDrive path with spaces and a terminal in another folder; collector guard simulated
-- NOT tested here: the two PowerShell scripts (no PowerShell in the development environment)
+- 34 offline unit tests pass (fake client); bug found and fixed: the index writer opened a session before validating statements
+- verified 2026-11-19 on the real Aura graph: 19 checks passed, 2 warning(s); example Kimsuky: {'documented': 130, 'inferred': 58, 'candidate': 0, 'total': 188} <!-- M11-VERIFIED -->
+### Known limitations
+- Property names are discovered at run time; edge directions other than USES are matched undirected; no text-to-Cypher
+
+## [Milestones 5-10 - catch-up record] - 2026-11-18
+Full detail with sources: `docs/CHANGE_REPORT_2026-11-18_M5-M11.md`.
+- M5/5.1 canonical model (6,207 entities; HAS_WEAKNESS 171 -> 1,755) | M6 Docling, 2,734 chunks / 53 advisories | M7 naive RAG | M8/8.1 hybrid retrieval | M9/9.1/9b GraphRAG (own + official pilot) | M10 Neo4j Aura sync verified 2026-11-17 (6,313 nodes, 28,616 relationships, idempotent)
+- If your working copy's CHANGELOG already has these entries from the `apply_milestone_N_docs.py` scripts, keep those and do not duplicate this block.
 
 ## [Milestone 4 - raw data audit, and fixes found by the Milestone 3 gate run] - 2026-11-04
 ### Verified on the user's PC before these changes (2026-11-03)
