@@ -135,8 +135,28 @@ def main() -> int:
 
         # --- temporal -----------------------------------------------------------------------------
         if gm.n("date"):
-            ch = repo.changed_since("1970-01-01", limit=5)
-            rec("temporal query works", "PASS" if ch["entities"] else "WARN", f"date property {gm.n('date')}")
+            dp = gm.q("date")
+            valid_re = "[0-9]{4}-[0-9]{2}-[0-9]{2}.*"
+            expect = client.run_read(f"MATCH (n:Entity) WHERE n.{dp} IS NOT NULL AND toString(n.{dp}) =~ '{valid_re}' RETURN count(n) AS c")[0]["c"]
+            ch = repo.changed_since("1970-01-01", limit=1000)
+            rec("temporal query: epoch cutoff returns every dated entity",
+                "PASS" if len(ch["entities"]) == min(expect, 1000) and expect > 0 else "FAIL",
+                f"date property {gm.n('date')}: function {len(ch['entities'])} vs Cypher count {expect}")
+            cut = "2024-01-01"
+            after = client.run_read(f"MATCH (n:Entity) WHERE n.{dp} IS NOT NULL AND toString(n.{dp}) =~ '{valid_re}' "
+                                    f"AND substring(toString(n.{dp}), 0, 10) >= $c RETURN count(n) AS c", {"c": cut})[0]["c"]
+            got = repo.changed_since(cut, limit=1000)["entities"]
+            rec("temporal query: cutoff splits before / after correctly", "PASS" if len(got) == min(after, 1000) else "FAIL",
+                f"since {cut}: function {len(got)} vs Cypher {after} (of {expect} dated)")
+            future = repo.changed_since("2999-01-01")["entities"]
+            rec("temporal query: a far-future cutoff returns nothing", "PASS" if not future else "FAIL", f"{len(future)} row(s)")
+            types_seen = sorted({t for e in ch["entities"] for t in e["types"]})
+            rec("temporal query: only entity types that carry the date appear", "PASS", f"types: {types_seen}")
+            try:
+                repo.changed_since("not-a-date"); rec("temporal query: invalid cutoff is rejected", "FAIL")
+            except ValueError:
+                rec("temporal query: invalid cutoff is rejected", "PASS")
+            extra["temporal"] = {"date_property": gm.n("date"), "dated_entities": expect, "since_2024": after}
         else:
             rec("temporal query works", "WARN", "no date property on entities; temporal retrieval reports itself unavailable")
 

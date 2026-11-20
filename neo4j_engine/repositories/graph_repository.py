@@ -7,6 +7,7 @@ into documented results without a label.
 """
 from __future__ import annotations
 
+from datetime import date, datetime
 from typing import Any
 
 from neo4j_engine.queries import cypher as C
@@ -36,6 +37,16 @@ def _limit(n: int, default: int = 25) -> int:
     except (TypeError, ValueError):
         n = default
     return max(1, min(n, MAX_LIMIT))
+
+
+def _iso_cutoff(value: str, *, date_only: bool) -> str:
+    """Validate the user's cutoff in Python (never send a malformed date to the database)."""
+    try:
+        text = str(value).strip()
+        parsed = date.fromisoformat(text) if len(text) == 10 else datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError:
+        raise ValueError(f"cutoff {value!r} is not an ISO date (expected YYYY-MM-DD)") from None
+    return parsed.isoformat()[:10] if date_only else parsed.isoformat()
 
 
 class GraphRepository:
@@ -252,6 +263,7 @@ class GraphRepository:
         if not self.gm.n("date"):
             raise CapabilityUnavailable("no date property (modified_at / published_at ...) exists on entities in this graph")
         types = self.gm.check_labels(types)
+        since = _iso_cutoff(since, date_only=not self.gm.is_temporal("date"))
         params: dict[str, Any] = {"since": since, "limit": _limit(limit, 25)}
         if types:
             params["types"] = types

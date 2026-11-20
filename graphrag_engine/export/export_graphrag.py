@@ -50,7 +50,13 @@ def main():
     ap.add_argument("--canonical", default=os.path.join("data", "canonical", "entities.json"))
     ap.add_argument("--chunks", default=os.path.join("data", "processed", "advisory_chunks.jsonl"))
     a = ap.parse_args()
+    import time
+    t0 = time.time()
+
+    def say(msg):
+        print(f"[{time.time() - t0:5.1f}s] {msg}", flush=True)
     out_dir = os.path.join(a.data, "output")
+    say("reading GraphRAG parquet files ...")
     frames = {}
     for n in NAMES:
         p = os.path.join(out_dir, f"{n}.parquet")
@@ -59,6 +65,7 @@ def main():
     for need in ("entities", "relationships"):
         if need not in frames:
             sys.exit(f"{need}.parquet not found in {out_dir} - has `graphrag index` finished?")
+    say("parquet read: " + ", ".join(f"{k}={len(v)}" for k, v in frames.items()))
     manifest_path = os.path.join(a.data, "input_manifest.json")
     if not os.path.isfile(manifest_path):
         sys.exit(f"{manifest_path} not found - run scripts\\prepare_ms_graphrag_input.py")
@@ -72,7 +79,9 @@ def main():
                     c = json.loads(line)
                     if c.get("report_id"):
                         chunk_report[c["chunk_id"]] = c["report_id"]
+    say(f"reading canonical entities from {a.canonical} ...")
     canonical = read_json_records(a.canonical)
+    say(f"canonical entities read: {len(canonical)}; mapping and validating ...")
     if not canonical:
         print(f"[warn] {a.canonical} not found or empty: nothing can be linked to canonical ids (all non-ID entities become candidates)")
     export = build_export(frames, load_rules(a.rules), canonical, manifest, os.path.join(a.data, "input"), chunk_report)

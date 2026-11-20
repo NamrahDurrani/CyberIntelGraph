@@ -144,7 +144,8 @@ def build_plan(export: dict | None, canonical_entities: list[dict], canonical_re
             linked_by_label[canon_type[n["entity_id"]]].append({"entity_id": n["entity_id"], "props": sanitize_props(gr)})
         else:
             props = {**gr, "name": n["name"], "entity_type": n["entity_type"], "origin": "graphrag",
-                     "canonical_type": n["canonical_type"], "evidence_types": [n["evidence_type"]]}
+                     "canonical_type": n["canonical_type"], "evidence_types": [n["evidence_type"]],
+                     "generic": n.get("generic", False), "scoped_to_document": n.get("scoped_to_document")}
             cand_by_label[n["entity_type"]].append({"entity_id": n["entity_id"], "props": sanitize_props(props)})
     check_names(list(by_label) + list(cand_by_label) + list(linked_by_label), [])
     for label, rows in sorted(by_label.items()):
@@ -259,18 +260,92 @@ def graph_counts(driver, database=None) -> dict:
     return out
 
 
+def tcp_probe(host: str, port: int, timeout: float = 6.0) -> bool:
+    """Can this machine open a TCP connection to host:port at all? (separates network problems from login problems)"""
+    import socket
+    try:
+        with socket.create_connection((host, port), timeout=timeout):
+            return True
+    except OSError:
+        return False
+
+
+def split_uri(uri: str) -> tuple[str, int]:
+    rest = re.sub(r"^[A-Za-z][A-Za-z0-9+.\-]*://", "", uri).split("/")[0]       # "neo4j+s://" has digits in its scheme
+    host, _, port = rest.partition(":")
+    return host, int(port) if port.isdigit() else 7687
+
+
+def _certifi_bundle() -> str | None:
+    try:
+        import certifi
+        return certifi.where()
+    except Exception:                                                        # noqa: BLE001
+        return None
+
+
+def _open_driver(uri: str, user: str, pwd: str, bundle: str | None):
+    """bundle=None: trust the operating system's certificates (what neo4j+s:// means).
+    bundle=<pem file>: same encrypted connection, but trusting that CA bundle (certifi's, or your organisation's)."""
+    from neo4j import GraphDatabase
+    kw = dict(connection_timeout=15, connection_acquisition_timeout=30, max_transaction_retry_time=20)
+    if bundle is None:
+        return GraphDatabase.driver(uri, auth=(user, pwd), **kw)
+    import neo4j
+    base = re.sub(r"^(neo4j|bolt)\+s://", r"\1://", uri)       # the driver refuses +s together with trusted_certificates
+    return GraphDatabase.driver(base, auth=(user, pwd), encrypted=True,
+                                trusted_certificates=neo4j.TrustCustomCAs(bundle), **kw)
+
+
 def connect():
+    """Open and verify a connection. Environment / .env: NEO4J_URI, NEO4J_USERNAME (or NEO4J_USER), NEO4J_PASSWORD,
+    optional NEO4J_DATABASE, NEO4J_TLS (auto | system | certifi) and NEO4J_CA_BUNDLE (path of a .pem file).
+    auto = try the system certificate store first, then certifi's CA bundle (some Windows machines cannot verify
+    Aura's certificate with their own store although it is perfectly valid)."""
     load_env_file()
-    uri, user, pwd = os.environ.get("NEO4J_URI"), os.environ.get("NEO4J_USERNAME"), os.environ.get("NEO4J_PASSWORD")
+    uri, pwd = os.environ.get("NEO4J_URI"), os.environ.get("NEO4J_PASSWORD")
+    user = os.environ.get("NEO4J_USERNAME") or os.environ.get("NEO4J_USER")
     missing = [n for n, v in (("NEO4J_URI", uri), ("NEO4J_USERNAME", user), ("NEO4J_PASSWORD", pwd)) if not v]
     if missing:
         sys.exit(f"missing {', '.join(missing)} - put them in .env (see docs/pipeline/16_neo4j_sync.md)")
-    from neo4j import GraphDatabase
-    driver = GraphDatabase.driver(uri, auth=(user, pwd))
-    driver.verify_connectivity()
-    host = re.sub(r"^[a-z+]+://", "", uri).split("/")[0]
-    print(f"connected to {host} as {user}")
-    return driver, (os.environ.get("NEO4J_DATABASE") or None)
+    host, port = split_uri(uri)
+    print(f"step 1/3: checking that this machine can reach {host}:{port} ...", flush=True)
+    if not tcp_probe(host, port):
+        sys.exit(f"cannot open a TCP connection to {host}:{port} within 6 seconds. This is a NETWORK problem, not a password problem: "
+                 "the instance may still be starting or paused (check the Aura console), or your network/firewall blocks port 7687. "
+                 f"Test in PowerShell:  Test-NetConnection {host} -Port 7687   - then try another network (for example a phone hotspot).")
+    from neo4j.exceptions import AuthError
+    mode = (os.environ.get("NEO4J_TLS") or "auto").lower()
+    custom = os.environ.get("NEO4J_CA_BUNDLE") or _certifi_bundle()
+    encrypted_scheme = bool(re.match(r"^(neo4j|bolt)\+s://", uri))
+    attempts = []
+    if mode in ("auto", "system") or not (encrypted_scheme and custom):
+        attempts.append(("the system certificate store", None))
+    if mode in ("auto", "certifi") and encrypted_scheme and custom:
+        attempts.append((f"the CA bundle {os.path.basename(custom)}", custom))
+    last = None
+    for label, bundle in attempts:
+        print(f"step 2/3: network reachable; logging in (trusting {label}) ...", flush=True)
+        driver = _open_driver(uri, user, pwd, bundle)
+        try:
+            driver.verify_connectivity()
+        except AuthError:
+            driver.close()
+            sys.exit("login rejected by Neo4j (wrong username or password). Use the username and password from the Aura credentials file "
+                     "(the username is normally 'neo4j'); if the password was lost, reset it in the Aura console.")
+        except Exception as ex:                                          # noqa: BLE001
+            driver.close()
+            last = ex
+            print(f"  not accepted ({type(ex).__name__}): {str(ex)[:120]}", flush=True)
+            continue
+        print(f"step 3/3: connected to {host} as {user} (trusting {label})", flush=True)
+        if bundle and mode == "auto":
+            print("  tip: the system certificate store could not verify the server but this CA bundle could; "
+                  "add NEO4J_TLS=certifi to .env to skip the first attempt.", flush=True)
+        return driver, (os.environ.get("NEO4J_DATABASE") or None)
+    sys.exit(f"login failed ({type(last).__name__}): {str(last)[:200]}\n"
+             "If the messages mention routing or SSL/certificates: set NEO4J_CA_BUNDLE in .env to your organisation's root certificate (.pem) "
+             "if a company proxy inspects HTTPS; otherwise check that the instance is running in the Aura console.")
 
 
 def main():

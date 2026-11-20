@@ -132,8 +132,19 @@ def shortest_path(gm: GraphMap, *, rel_types: list[str] | None, max_hops: int, i
 
 
 def changed_since(gm: GraphMap, *, typed: bool) -> str:
+    """Entities whose date property is on/after $since.
+
+    * real Neo4j temporal property -> compared as a datetime;
+    * STRING property (e.g. kev_date_added "2021-11-03") -> only values that LOOK like an ISO date are
+      compared (first 10 characters, fixed-width so text order == calendar order). Missing (null) and
+      malformed values are left out, never guessed at, and never raise an error in the database.
+    """
     datep = gm.q("date")
-    cmp_ = f"n.{datep} >= datetime($since)" if gm.is_temporal("date") else f"n.{datep} >= $since"
+    if gm.is_temporal("date"):
+        cmp_ = f"n.{datep} >= datetime($since)"
+    else:
+        cmp_ = (f"n.{datep} =~ '[0-9]{{4}}-[0-9]{{2}}-[0-9]{{2}}.*' "
+                f"AND substring(n.{datep}, 0, 10) >= $since")
     where = [cmp_] + (["any(l IN labels(n) WHERE l IN $types)"] if typed else [])
     return ("MATCH (n:Entity)\nWHERE " + " AND ".join(where) + "\n"
             f"RETURN labels(n) AS labels, properties(n) AS props\nORDER BY n.{datep} DESC\nLIMIT $limit")

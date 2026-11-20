@@ -326,6 +326,36 @@ class RepositoryTests(unittest.TestCase):
         with self.assertRaises(CapabilityUnavailable):
             none.changed_since("2026-01-01")
 
+    def test_kev_date_added_is_mapped_as_the_date_field(self):                     # Milestone 11.2
+        rep = {**REPORT, "properties": {"Entity": {"entity_id": ["String"], "name": ["String"], "kev_date_added": ["String"]}}}
+        gm = GraphMap.from_report(rep)
+        self.assertEqual(gm.n("date"), "kev_date_added")
+        self.assertFalse(gm.is_temporal("date"))
+        self.assertNotIn("node.date", gm.unresolved())
+        # a graph that has a real modified date keeps preferring it
+        self.assertEqual(GraphMap.from_report(REPORT).n("date"), "modified_at")
+
+    def test_string_date_query_ignores_missing_and_malformed_values(self):
+        rep = {**REPORT, "properties": {"Entity": {"entity_id": ["String"], "name": ["String"], "kev_date_added": ["String"]}}}
+        cy = C.changed_since(GraphMap.from_report(rep), typed=True)
+        assert_read_only(cy)
+        self.assertIn("=~ '[0-9]{4}-[0-9]{2}-[0-9]{2}.*'", cy)       # malformed / null never reach the comparison
+        self.assertIn("substring(n.`kev_date_added`, 0, 10) >= $since", cy)
+        self.assertIn("labels(n) WHERE l IN $types", cy)               # other node types simply have no value -> excluded
+
+    def test_since_cutoff_is_validated_and_normalised(self):
+        rep = {**REPORT, "properties": {"Entity": {"entity_id": ["String"], "name": ["String"], "kev_date_added": ["String"]}}}
+        fake = FakeClient([("kev_date_added", [{"labels": ["Entity", "Vulnerability"], "props": {"entity_id": "CVE-2024-1", "name": "CVE-2024-1", "kev_date_added": "2024-05-01"}}])])
+        repo = GraphRepository(fake, GraphMap.from_report(rep))
+        res = repo.changed_since("2024-01-01T10:00:00Z", types=["Vulnerability"])
+        self.assertEqual(fake.calls[0][1]["since"], "2024-01-01")      # date-only for a string property
+        self.assertEqual(res["date_property"], "kev_date_added")
+        self.assertEqual(res["entities"][0]["id"], "CVE-2024-1")
+        for bad in ("yesterday", "2024-13-45", "2024/01/01", "'; DROP", ""):
+            with self.assertRaises(ValueError):
+                repo.changed_since(bad)
+        self.assertEqual(len(fake.calls), 1)                            # bad cutoffs never reached the database
+
     def test_index_plan(self):
         plan = plan_indexes(GraphMap.from_report(REPORT))
         self.assertEqual(len(plan), 2)

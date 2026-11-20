@@ -34,7 +34,8 @@ NODE_FIELDS: dict[str, tuple[str, ...]] = {
     "origin": ("origin", "source_origin"),
     "evidence_type": ("evidence_type", "evidence_types", "evidence_kind"),
     "source_url": ("source_url", "url"),
-    "date": ("modified_at", "last_modified_at", "last_modified", "modified", "updated_at", "published_at", "created_at"),
+    "date": ("modified_at", "last_modified_at", "last_modified", "modified", "updated_at", "published_at", "created_at",
+             "kev_date_added"),   # Milestone 11.2: CISA KEV "date added" on Vulnerability nodes (STRING, YYYY-MM-DD)
 }
 REL_FIELDS: dict[str, tuple[str, ...]] = {
     "id": ("rel_id", "relationship_id", "id"),

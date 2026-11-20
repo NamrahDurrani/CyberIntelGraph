@@ -1,11 +1,12 @@
 {
-  "note": "STARTER rules written from the first pilot advisory (aa22-103a). Review them against your own output (scripts/apply_milestone_9b_docs.py prints the top entities) and extend. Titles are compared upper-case.",
+  "note": "generic_mode: \"scope\" turns a generic title (TOOL, APT ACTORS ...) into ONE candidate node per advisory instead of dropping it, so its relationships survive; \"drop\" removes it. STARTER rules written from the first pilot advisory (aa22-103a). Review them against your own output (scripts/apply_milestone_9b_docs.py prints the top entities) and extend. Titles are compared upper-case.",
   "type_map": {
     "THREAT_ACTOR": "ThreatActor", "MALWARE": "Malware", "TOOL": "Tool", "VULNERABILITY": "Vulnerability",
     "ATTACK_TECHNIQUE": "AttackTechnique", "SOFTWARE": "Software", "ORGANIZATION": "Organization",
     "CAMPAIGN": "Campaign", "MITIGATION": "Mitigation", "SECTOR": "Sector"
   },
   "extension_types": ["Sector"],
+  "generic_mode": "scope",
   "generic_titles": ["TOOL", "TOOLS", "APT ACTORS", "THREAT ACTORS", "ATTACKERS", "ADVERSARIES", "MITIGATIONS",
                      "MITIGATION", "ORGANIZATION", "ORGANIZATIONS", "SYSTEMS", "DEVICES", "VULNERABILITIES",
                      "MALWARE", "SOFTWARE", "VENDORS", "USERS", "NETWORKS"],

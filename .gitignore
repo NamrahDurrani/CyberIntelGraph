@@ -32,3 +32,16 @@ outputs/**
 logs/**
 !logs/
 !logs/.gitkeep
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+.env.txt
+
+# Python virtual environments
+.venv/
+.venv*/
+venv/
+.env
+.env.example
