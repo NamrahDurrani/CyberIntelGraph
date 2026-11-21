@@ -37,3 +37,14 @@
 
 ## Next exact task
 Run the Milestone 11 steps above, paste the output of `check_neo4j_retrieval.py` (and `schema`, if any field is reported as not found).
+
+<!-- milestone-13 -->
+## Milestone 13 - LangGraph supervisor and specialist agents
+Implemented. Live verification on the project PC is still pending.
+
+What exists: a supervisor that plans an investigation, four read-only specialist agents that run in parallel, structured
+claims with evidence ids, and an answer that cites only existing evidence. Run: `python scripts/run_agent.py "<question>"`.
+
+Known limits: no independent claim verification or live KEV/NVD check yet (Milestone 14); no MongoDB persistence or
+FastAPI endpoints yet (Milestones 14 and 15); document retrieval needs RAG_RETRIEVER in .env; answer quality depends on the
+LLM and on how many advisories GraphRAG has processed (pilot only).

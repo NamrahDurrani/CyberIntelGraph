@@ -75,3 +75,9 @@ python scripts\apply_milestone_11_docs.py                   # records the real r
 ```
 verified 2026-11-19 on the real Aura graph: 19 checks passed, 2 warning(s); example Kimsuky: {'documented': 130, 'inferred': 58, 'candidate': 0, 'total': 188} <!-- M11-VERIFIED -->
 Explanation: `docs/pipeline/15_neo4j_cypher_retrieval.md`. Credentials live in `.env` (see `.env.example`); never commit real keys.
+
+<!-- milestone-13 -->
+## Research agent (Milestone 13)
+Ask a question: `python scripts/run_agent.py "Which techniques does APT29 use?"`
+Offline self-check: `python scripts/check_agent.py`. Live check: `python scripts/check_agent.py --live`.
+Details: docs/milestones/M13_langgraph_agent.md
