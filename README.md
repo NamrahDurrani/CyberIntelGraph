@@ -81,3 +81,8 @@ Explanation: `docs/pipeline/15_neo4j_cypher_retrieval.md`. Credentials live in `
 Ask a question: `python scripts/run_agent.py "Which techniques does APT29 use?"`
 Offline self-check: `python scripts/check_agent.py`. Live check: `python scripts/check_agent.py --live`.
 Details: docs/milestones/M13_langgraph_agent.md
+
+<!-- milestone-14 -->
+## Verification and live fallback (Milestone 14)
+Offline check: `python scripts/check_verification.py`. Live KEV/NVD check: `python scripts/check_verification.py --live`.
+MongoDB check: `python scripts/check_mongodb_persistence.py`. Details: docs/milestones/M14_verification_and_live_fallback.md

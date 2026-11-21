@@ -48,3 +48,14 @@ claims with evidence ids, and an answer that cites only existing evidence. Run: 
 Known limits: no independent claim verification or live KEV/NVD check yet (Milestone 14); no MongoDB persistence or
 FastAPI endpoints yet (Milestones 14 and 15); document retrieval needs RAG_RETRIEVER in .env; answer quality depends on the
 LLM and on how many advisories GraphRAG has processed (pilot only).
+
+<!-- milestone-14 -->
+## Milestone 14 - Independent verification, live fallback, MongoDB persistence
+Implemented. Live verification on the project PC (KEV/NVD, MongoDB) is still pending.
+
+What exists: every answer is audited against its evidence; CVE questions get a live KEV / NVD check with provenance; investigations and
+agent traces are saved to MongoDB.
+
+Known limits: investigations are stored in their own collections (not the Milestone 12 validated reports / agent_traces repositories)
+- to be unified in Milestone 15; verification is lexical / identifier based; on FAIL only the answer is rewritten, specialist agents are not
+re-run; live fallback covers KEV and NVD only; FastAPI endpoints and report generation are Milestone 15.
