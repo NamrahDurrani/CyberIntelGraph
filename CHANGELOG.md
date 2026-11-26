@@ -4,6 +4,10 @@ Record every meaningful change here (date, milestone, files added/changed, depen
 commands run, tests performed, known limitations).
 
 
+## Milestone 10 - canonical graph and GraphRAG candidates in Neo4j
+- Canonical graph (6,313 nodes, 28,616 relationships in total) and the pilot GraphRAG candidates synchronised to Neo4j with MERGE; repeat run creates nothing.
+- Added an independent database check (`scripts/check_neo4j_graph.py`).
+
 ## [Milestone 11 - Cypher retrieval on Neo4j] - 2026-11-18
 ### Added
 - `neo4j_engine/connection/client.py`, `schema/introspect.py`, `schema/mapping.py`, `schema/indexes.py`, `queries/cypher.py`, `repositories/evidence.py`, `repositories/graph_repository.py`, `cli.py`
@@ -168,3 +172,10 @@ Full detail with sources: `docs/CHANGE_REPORT_2026-11-18_M5-M11.md`.
 - MongoDB persistence into new collections investigation_runs and investigation_traces (idempotent); JSON copy always written first.
 - Scripts: check_verification.py, check_mongodb_persistence.py, apply_milestone_14_docs.py.
 - Status: Implemented. Live verification on the project PC (KEV/NVD, MongoDB) is still pending.
+## 2026-11-26 - Milestones 15 to 18 pushed (honest status)
+
+- **Milestone 15 (report generation and FastAPI):** backend committed.
+- **Milestone 16 (frontend):** Next.js interface committed (dashboard, investigations, graph and evidence explorers, live pipeline panel).
+- **Milestone 17 (evaluation):** evaluation harness and a 26-question benchmark set added (`evaluation/`, `docs/evaluation/`). **Not yet run against the deployed system: no measured results recorded.**
+- **Milestone 18 (integration, security review, deployment):** Dockerfile, `fly.toml`, Vercel configuration, deployment guide, chat UI (multiple questions per chat, new sidebar with icon rail, docked composer, single scrollbar), new README, sanitized `.env.example`. **Not yet deployed. Security review items open:** registration policy, rate limiting, CORS origins, dependency review.
+- **Security:** keys that appeared in `.env.example` and in shared files must be rotated before any public deployment.

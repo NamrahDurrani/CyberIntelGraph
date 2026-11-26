@@ -59,3 +59,7 @@ agent traces are saved to MongoDB.
 Known limits: investigations are stored in their own collections (not the Milestone 12 validated reports / agent_traces repositories)
 - to be unified in Milestone 15; verification is lexical / identifier based; on FAIL only the answer is rewritten, specialist agents are not
 re-run; live fallback covers KEV and NVD only; FastAPI endpoints and report generation are Milestone 15.
+
+## Milestone 10 - done
+- Neo4j holds the canonical graph plus the pilot GraphRAG candidates (6,313 nodes, 28,616 relationships).
+- Next: Milestone 11 (Neo4j indexes and Cypher retrieval).

@@ -1,0 +1,33 @@
+app = "cyberintel-api"          # must be globally unique on Fly.io; change it if `fly apps create` says it is taken
+primary_region = "fra"          # pick the region closest to your Neo4j Aura and MongoDB Atlas clusters
+
+[build]
+  dockerfile = "Dockerfile"
+  [build.args]
+    APP_MODULE = "backend.main:app"
+    PREFETCH_MODEL = ""         # e.g. "BAAI/bge-m3" to bake the embedding model into the image
+
+[env]
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1      # keeps the API warm; 0 saves money but the first request after idle is slow
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 20
+    hard_limit = 25
+
+  [[http_service.checks]]
+    grace_period = "60s"
+    interval = "30s"
+    method = "GET"
+    timeout = "5s"
+    path = "/api/health"        # confirm this route exists at /docs; change it if your health route differs
+
+[[vm]]
+  size = "shared-cpu-2x"
+  memory = "4gb"                # BAAI/bge-m3 needs roughly 2.5 GB RAM; use 1gb-2gb only if embeddings are hosted

@@ -1,34 +1,32 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowUp } from "lucide-react";
+import { Composer } from "@/components/chat/Composer";
 import { ErrorBox } from "@/components/ui";
 import { useAuth } from "@/lib/auth";
+import { useConv } from "@/lib/conversations";
 import { useLive } from "@/lib/live";
 
 const IDEAS = ["Which techniques does APT28 use?", "What is known about CVE-2023-23397?", "Which vulnerabilities are linked to a ransomware group?", "Show evidence for T1059 usage"];
 
+/** First question of a new chat: the composer sits in the middle of the page. After sending, the chat opens with the composer docked at the bottom. */
 export default function NewChat() {
-  const { user } = useAuth(); const { start, reset } = useLive(); const router = useRouter();
-  const [q, setQ] = useState(""); const [err, setErr] = useState<string | null>(null); const [busy, setBusy] = useState(false);
+  const { user } = useAuth(); const { start, reset } = useLive(); const { create } = useConv(); const router = useRouter();
+  const [err, setErr] = useState<string | null>(null); const [busy, setBusy] = useState(false);
   const [greet, setGreet] = useState("Hello");
   useEffect(() => { reset(); const h = new Date().getHours(); setGreet(h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening"); }, [reset]);
-  async function go(text = q) {
-    if (text.trim().length < 5) return setErr("Ask a complete question (at least 5 characters).");
+  async function go(text: string): Promise<boolean> {
     setBusy(true); setErr(null);
-    try { router.push(`/investigations/${await start(text.trim())}`); } catch (e) { setErr((e as Error).message); setBusy(false); }
+    try { const id = await start(text.trim()); router.push(`/chat/${create(text.trim(), id)}`); return true; }
+    catch (e) { setErr((e as Error).message); setBusy(false); return false; }
   }
   return (
     <section className="hero">
       <h1>{greet}, {user?.name.split(" ")[0]}</h1>
       <p className="muted" style={{ margin: "-14px 0 0" }}>What should we investigate? Every answer is checked against evidence.</p>
-      <div className="composer">
-        <textarea rows={1} value={q} placeholder="Ask a threat intelligence question…" aria-label="Question" onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); go(); } }} />
-        <button className="btn btn-primary btn-icon" onClick={() => go()} disabled={busy} aria-label="Investigate"><ArrowUp size={18} /></button>
-      </div>
-      <ErrorBox msg={err} />
-      <div className="suggest">{IDEAS.map((i) => <button key={i} onClick={() => { setQ(i); go(i); }}>{i}</button>)}</div>
+      <div className="hero-composer"><Composer onSend={go} busy={busy} autoFocus /></div>
+      {err && <ErrorBox msg={err} />}
+      <div className="suggest">{IDEAS.map((i) => <button key={i} disabled={busy} onClick={() => void go(i)}>{i}</button>)}</div>
     </section>
   );
 }

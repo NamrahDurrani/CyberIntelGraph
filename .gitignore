@@ -45,3 +45,10 @@ logs/**
 venv/
 .env
 .env.example
+
+_release/
+.milestone_safety_*/
+_apply*/
+_collect/
+frontend_snapshot.txt
+evaluation/reports/eval_*

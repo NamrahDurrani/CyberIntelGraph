@@ -1,0 +1,28 @@
+.git
+.gitignore
+.venv
+.venv-graphrag
+**/__pycache__
+**/*.pyc
+.pytest_cache
+node_modules
+frontend
+docs
+tests
+evaluation
+_release
+_apply*
+_collect
+_eval
+_deploy
+.backup_*
+.milestone_safety_*
+*.zip
+.env
+.env.*
+!.env.example
+# Runtime data is NOT sent to the image by default (it can be gigabytes).
+# If the API reads local index files at startup (see `fly logs` after the first deploy), remove the folder it needs from this list.
+data
+outputs
+logs

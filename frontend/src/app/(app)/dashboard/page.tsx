@@ -5,6 +5,7 @@ import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis
 import { Empty, ErrorBox, Skeleton, StatusBadge, timeAgo } from "@/components/ui";
 import { api } from "@/lib/api";
 import type { Dashboard } from "@/lib/types";
+import { entityLabel } from "@/lib/ui-text";
 
 const FOCUS = ["ThreatActor", "Vulnerability", "Malware", "AttackTechnique"];
 export default function DashboardPage() {
@@ -22,7 +23,7 @@ export default function DashboardPage() {
         <div className="card stat"><b>{d.investigations.total}</b><span className="muted small">Investigations</span></div>
         <div className="card stat"><b>{d.investigations.by_status.completed ?? 0}</b><span className="muted small">Completed and verified</span></div>
         <div className="card stat"><b>{d.investigations.by_status.needs_approval ?? 0}</b><span className="muted small">Awaiting your approval</span></div>
-        {FOCUS.map((k) => <div className="card stat" key={k}><b>{d.graph ? (d.graph.labels[k] ?? 0).toLocaleString() : "n/a"}</b><span className="muted small">{k.replace(/([A-Z])/g, " $1").trim()}s</span></div>)}
+        {FOCUS.map((k) => <div className="card stat" key={k}><b>{d.graph ? (d.graph.labels[k] ?? 0).toLocaleString() : "n/a"}</b><span className="muted small">{entityLabel(k.replace(/([A-Z])/g, " $1").trim())}</span></div>)}
       </div>
       <div className="grid g2">
         <div className="card"><h3 style={{ fontSize: 16, marginBottom: 12 }}>Graph entities by type</h3>

@@ -1,16 +1,20 @@
 "use client";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ExternalLink, ShieldAlert } from "lucide-react";
 import { GraphView } from "@/components/GraphView";
 import { Empty, ErrorBox, Skeleton, StatusBadge } from "@/components/ui";
 import { api } from "@/lib/api";
+import { useConv } from "@/lib/conversations";
 import { useLive } from "@/lib/live";
 import type { Graph, Investigation } from "@/lib/types";
 
 export default function InvestigationPage() {
   const { id } = useParams<{ id: string }>();
   const { activeId, events, watch, refreshHistory } = useLive();
+  const { byInvestigation } = useConv(); const chat = byInvestigation(id);
+  const back = <Link href={`/chat/${chat.id}`} className="muted small">← Back to chat</Link>;
   const [inv, setInv] = useState<Investigation | null>(null); const [err, setErr] = useState<string | null>(null);
   const [tab, setTab] = useState<"answer" | "graph" | "evidence">("answer");
   const [graph, setGraph] = useState<Graph>({ nodes: [], edges: [] }); const [gErr, setGErr] = useState<string | null>(null);
@@ -28,12 +32,13 @@ export default function InvestigationPage() {
   }, [id, entityEvents, terminal]);
 
   async function approve() { await api(`/api/investigations/${id}/approve`, { method: "POST" }); load(); refreshHistory(); }
-  if (err) return <div className="page"><ErrorBox msg={err} /></div>;
-  if (!inv) return <div className="page grid"><Skeleton h={32} w="60%" /><Skeleton h={120} /><Skeleton h={220} /></div>;
+  if (err) return <div className="page grid">{back}<ErrorBox msg={err} /></div>;
+  if (!inv) return <div className="page grid">{back}<Skeleton h={32} w="60%" /><Skeleton h={120} /><Skeleton h={220} /></div>;
   const v = inv.verification; const verdict = (cid: string) => v?.verdicts.find((x) => x.claim_id === cid);
   const evs = Object.values(inv.evidence ?? {});
   return (
     <div className="page">
+      {back}
       <div className="row" style={{ gap: 12, flexWrap: "wrap" }}><h2 className="grow">{inv.question}</h2><StatusBadge status={inv.status} /></div>
       <div className="tabs" role="tablist">{(["answer", "graph", "evidence"] as const).map((t) => <button key={t} role="tab" aria-selected={tab === t} className={tab === t ? "on" : ""} onClick={() => setTab(t)}>{t === "answer" ? "Report" : t === "graph" ? "Live knowledge graph" : `Evidence (${evs.length})`}</button>)}</div>
 
